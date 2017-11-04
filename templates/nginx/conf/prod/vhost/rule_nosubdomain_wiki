@@ -1,0 +1,3 @@
+if ( $host = '(dtcq).joyme.com' ) {
+    rewrite ^/mwiki/(.shtml)? http://m.wiki.joyme.com/${wkey}/$1 permanent;
+}

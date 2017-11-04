@@ -1,0 +1,313 @@
+
+            set $uismob 0;
+                if ( $http_user_agent ~ "^((.*MIDP.*)|(.*WAP.*)|(.*UP.Browser.*)|(.*Smartphone.*)|(.*Obigo.*)|(.*Mobile.*)|(.*AU.Browser.*)|(.*wxd.Mms.*)|(.*WxdB.Browser.*)|(.*CLDC.*)|(.*UP.Link.*)|(.*KM.Browser.*)|(.*UCWEB.*)|(.*SEMC\-Browser.*)|(.*Mini.*)|(.*Symbian.*)|(.*Palm.*)|(.*Nokia.*)|(.*Panasonic.*)|(.*MOT\-.*)|(.*SonyEricsson.*)|(.*NEC\-.*)|(.*Alcatel.*)|(.*Ericsson.*)|(.*BENQ.*)|(.*BenQ.*)|(.*Amoisonic.*)|(.*Amoi\-.*)|(.*Capitel.*)|(.*PHILIPS.*)|(.*SAMSUNG.*)|(.*Lenovo.*)|(.*Mitsu.*)|(.*Motorola.*)|(.*SHARP.*)|(.*WAPPER.*)|(.*LG\-.*)|(.*LG/.*)|(.*EG900.*)|(.*CECT.*)|(.*Compal.*)|(.*kejian.*)|(.*Bird.*)|(.*BIRD.*)|(.*G900/V1.0.*)|(.*Arima.*)|(.*CTL.*)|(.*TDG.*)|(.*Daxian.*)|(.*DAXIAN.*)|(.*DBTEL.*)|(.*Eastcom.*)|(.*EASTCOM.*)|(.*PANTECH.*)|(.*Dopod.*)|(.*Haier.*)|(.*HAIER.*)|(.*KONKA.*)|(.*KEJIAN.*)|(.*LENOVO.*)|(.*Soutec.*)|(.*SOUTEC.*)|(.*SAGEM.*)|(.*SEC\-.*)|(.*SED\-.*)|(.*EMOL\-.*)|(.*INNO55.*)|(.*ZTE.*)|(.*iPhone.*)|(.*Android.*)|(.*Windows CE.*)|(Wget.*)|(Java.*)|(curl.*)|(Opera.*))$" ){
+                        set $uismob 1;
+                }
+                if ( $uri ~ "(shenma|detail.xml)" ){
+                				   set $uismob 0;
+                }
+                if ( $uismob = 1 ) {
+                   rewrite  ^/(.*)  http://m.wiki.joyme.beta/$1 permanent;
+                }
+
+#location ~* /hs/{
+#rewrite /hs/(.*) /$1 break;
+#proxy_pass  http://hswiki.joyme.beta;
+#}
+
+location /hs/{
+##hs 特殊非wiki 是cms专区
+##rewrite /hs/(.*) /$1 break;
+##proxy_pass  http://hswiki.joyme.beta;
+            root   html;
+            index  index.html;
+            proxy_pass      http://cmsimage_pool/hs/;
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+            client_max_body_size  100m;
+}
+
+
+
+location /marvel/{
+if ($uri = '/marvel/' ) {
+rewrite  .  /marvel/首页 permanent;
+}
+if ($uri != '/marvel/' ) {
+rewrite /marvel/(.*)$   /$1  break;
+proxy_pass    http://marvel.joyme.beta;
+}
+}
+location /angrybirds/{
+if ($uri = '/angrybirds/' ) {
+rewrite  .  /angrybirds/首页 permanent;
+}
+if ($uri != '/angrybirds/' ) {
+rewrite /angrybirds/(.*)$   /$1  break;
+proxy_pass    http://angrybirds.joyme.beta;
+}
+}
+location /gintama/{
+if ($uri = '/gintama/' ) {
+rewrite  .  /gintama/首页 permanent;
+}
+if ($uri != '/gintama/' ) {
+rewrite /gintama/(.*)$   /$1  break;
+proxy_pass    http://gintama.joyme.beta;
+}
+}
+location /yumaoqiu/{
+if ($uri = '/yumaoqiu/' ) {
+rewrite  .  /yumaoqiu/首页 permanent;
+}
+if ($uri != '/yumaoqiu/' ) {
+rewrite /yumaoqiu/(.*)$   /$1  break;
+proxy_pass    http://yumaoqiu.joyme.beta;
+}
+}
+location /singer/{
+if ($uri = '/singer/' ) {
+rewrite  .  /singer/首页 permanent;
+}
+if ($uri != '/singer/' ) {
+rewrite /singer/(.*)$   /$1  break;
+proxy_pass    http://singer.joyme.beta;
+}
+}
+location /samurai/{
+if ($uri = '/samurai/' ) {
+rewrite  .  /samurai/首页 permanent;
+}
+if ($uri != '/samurai/' ) {
+rewrite /samurai/(.*)$   /$1  break;
+proxy_pass    http://samurai.joyme.beta;
+}
+}
+location /pvz/{
+if ($uri = '/pvz/' ) {
+rewrite  .  /pvz/首页 permanent;
+}
+if ($uri != '/pvz/' ) {
+rewrite /pvz/(.*)$   /$1  break;
+proxy_pass    http://pvz.joyme.beta;
+}
+}
+location /naruto/{
+if ($uri = '/naruto/' ) {
+rewrite  .  /naruto/首页 permanent;
+}
+if ($uri != '/naruto/' ) {
+rewrite /naruto/(.*)$   /$1  break;
+proxy_pass    http://naruto.joyme.beta;
+}
+}
+location /klyx/{
+if ($uri = '/klyx/' ) {
+rewrite  .  /klyx/首页 permanent;
+}
+if ($uri != '/klyx/' ) {
+rewrite /klyx/(.*)$   /$1  break;
+proxy_pass    http://klyx.joyme.beta;
+}
+}
+location /jc/{
+if ($uri = '/jc/' ) {
+rewrite  .  /jc/首页 permanent;
+}
+if ($uri != '/jc/' ) {
+rewrite /jc/(.*)$   /$1  break;
+proxy_pass    http://jc.joyme.beta;
+}
+}
+location /hmm/{
+if ($uri = '/hmm/' ) {
+rewrite  .  /hmm/首页 permanent;
+}
+if ($uri != '/hmm/' ) {
+rewrite /hmm/(.*)$   /$1  break;
+proxy_pass    http://hmm.joyme.beta;
+}
+}
+location /halo/{
+if ($uri = '/halo/' ) {
+rewrite  .  /halo/首页 permanent;
+}
+if ($uri != '/halo/' ) {
+rewrite /halo/(.*)$   /$1  break;
+proxy_pass    http://halo.joyme.beta;
+}
+}
+location /fate/{
+if ($uri = '/fate/' ) {
+rewrite  .  /fate/首页 permanent;
+}
+if ($uri != '/fate/' ) {
+rewrite /fate/(.*)$   /$1  break;
+proxy_pass    http://fate.joyme.beta;
+}
+}
+location /dol5/{
+if ($uri = '/dol5/' ) {
+rewrite  .  /dol5/首页 permanent;
+}
+if ($uri != '/dol5/' ) {
+rewrite /dol5/(.*)$   /$1  break;
+proxy_pass    http://dol5.joyme.beta;
+}
+}
+location /dc/{
+if ($uri = '/dc/' ) {
+rewrite  .  /dc/首页 permanent;
+}
+if ($uri != '/dc/' ) {
+rewrite /dc/(.*)$   /$1  break;
+proxy_pass    http://dc.joyme.beta;
+}
+}
+location /bwlb/{
+if ($uri = '/bwlb/' ) {
+rewrite  .  /bwlb/首页 permanent;
+}
+if ($uri != '/bwlb/' ) {
+rewrite /bwlb/(.*)$   /$1  break;
+proxy_pass    http://bwlb.joyme.beta;
+}
+}
+location /bio/{
+if ($uri = '/bio/' ) {
+rewrite  .  /bio/首页 permanent;
+}
+if ($uri != '/bio/' ) {
+rewrite /bio/(.*)$   /$1  break;
+proxy_pass    http://bio.joyme.beta;
+}
+}
+location /pal/{
+if ($uri = '/pal/' ) {
+rewrite  .  /pal/首页 permanent;
+}
+if ($uri != '/pal/' ) {
+rewrite /pal/(.*)$   /$1  break;
+proxy_pass    http://pal.joyme.beta;
+}
+}
+location /natu/{
+if ($uri = '/natu/' ) {
+rewrite  .  /natu/首页 permanent;
+}
+if ($uri != '/natu/' ) {
+rewrite /natu/(.*)$   /$1  break;
+proxy_pass    http://natu.joyme.beta;
+}
+}
+location /zjsn/{
+if ($uri = '/zjsn/' ) {
+rewrite  .  /zjsn/首页 permanent;
+}
+if ($uri != '/zjsn/' ) {
+rewrite /zjsn/(.*)$   /$1  break;
+proxy_pass    http://zjsn.joyme.beta;
+}
+}
+location /op/{
+if ($uri = '/op/' ) {
+rewrite  .  /op/首页 permanent;
+}
+if ($uri != '/op/' ) {
+rewrite /op/(.*)$   /$1  break;
+proxy_pass    http://op.joyme.beta;
+}
+}
+location /gundam/{
+if ($uri = '/gundam/' ) {
+rewrite  .  /gundam/首页 permanent;
+}
+if ($uri != '/gundam/' ) {
+rewrite /gundam/(.*)$   /$1  break;
+proxy_pass    http://gundam.joyme.beta;
+}
+}
+location /wwii/{
+if ($uri = '/wwii/' ) {
+rewrite  .  /wwii/首页 permanent;
+}
+if ($uri != '/wwii/' ) {
+rewrite /wwii/(.*)$   /$1  break;
+proxy_pass    http://wwii.joyme.beta;
+}
+}
+location /wca/{
+if ($uri = '/wca/' ) {
+rewrite  .  /wca/首页 permanent;
+}
+if ($uri != '/wca/' ) {
+rewrite /wca/(.*)$   /$1  break;
+proxy_pass    http://wca.joyme.beta;
+}
+}
+
+
+location /pocketmon/{
+if ($uri = '/pocketmon/' ) {
+rewrite  .  /pocketmon/首页 permanent;
+}
+if ($uri != '/pocketmon/' ) {
+rewrite /pocketmon/(.*)$   /$1  break;
+proxy_pass    http://pocketmon.joyme.beta;
+}
+}
+location /gfol/{
+if ($uri = '/gfol/' ) {
+rewrite  .  /gfol/首页 permanent;
+}
+if ($uri != '/gfol/' ) {
+rewrite /gfol/(.*)$   /$1  break;
+proxy_pass    http://gfol.joyme.beta;
+}
+}
+location /bss/{
+if ($uri = '/bss/' ) {
+rewrite  .  /bss/首页 permanent;
+}
+if ($uri != '/bss/' ) {
+rewrite /bss/(.*)$   /$1  break;
+proxy_pass    http://bss.joyme.beta;
+}
+}
+location /cq/{
+if ($uri = '/cq/' ) {
+rewrite  .  /cq/首页 permanent;
+}
+if ($uri != '/cq/' ) {
+rewrite /cq/(.*)$   /$1  break;
+proxy_pass    http://cq.joyme.beta;
+}
+}
+location /mxw/{
+if ($uri = '/mxw/' ) {
+rewrite  .  /mxw/首页 permanent;
+}
+if ($uri != '/mxw/' ) {
+rewrite /mxw/(.*)$   /$1  break;
+proxy_pass    http://mxw.joyme.beta;
+}
+}
+location /jyx/{
+if ($uri = '/jyx/' ) {
+rewrite  .  /jyx/首页 permanent;
+}
+if ($uri != '/jyx/' ) {
+rewrite /jyx/(.*)$   /$1  break;
+proxy_pass    http://jyx.joyme.beta;
+}
+}

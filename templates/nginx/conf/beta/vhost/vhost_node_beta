@@ -1,0 +1,12 @@
+upstream nodejs {
+   server alyweb008.prod:9800;
+}
+
+server {
+  listen 8000;
+  server_name node.joyme.beta;
+location / {
+   proxy_pass http://nodejs;
+}
+#access_log /opt/servicelogs/nodejs.access.log main;
+}

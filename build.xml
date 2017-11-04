@@ -1,0 +1,517 @@
+<project name="webserver" default="package" basedir=".">
+    <property name="dir.base" location="${basedir}"/>
+
+    <property name="dir.work" location="${dir.base}"/>
+    <property name="dir.archives" location="${dir.base}/archives"/>
+    <property name="dir.templates" location="${dir.base}/templates"/>
+
+    <property name="owner" value="webops"/>
+    <property name="group" value="operators"/>
+
+    <!-- created directories -->
+    <property name="dir.logs" location="${dir.work}/_logs"/>
+    <property name="dir.src.root" location="${dir.work}/_src"/>
+    <property name="dir.build" location="${dir.work}/_build"/>
+
+    <!--The build dist dir-->
+    <property name="dir.build.nginx" location="${dir.build}/nginx"/>
+    <property name="dir.build.pcre" location="${dir.build}/pcre"/>
+    <property name="dir.build.tomcat" location="${dir.build}/tomcat"/>
+    <property name="dir.build.webserver" location="${dir.build}/webserver"/>
+    <property name="dir.build.lib" location="${dir.build}/lib"/>
+
+    <!--The build src dir-->
+    <property name="dir.src.root.nginx" location="${dir.src.root}/nginx"/>
+    <property name="dir.src.root.pcre" location="${dir.src.root}/pcre"/>
+    <property name="dir.src.root.tomcat" location="${dir.src.root}/tomcat"/>
+    <property name="dir.src.lib" location="${dir.base}/src"/>
+
+    <!-- set package dirs: -->
+    <condition property="package.root" value="c:/ops/online/package">
+        <os family="windows"/>
+    </condition>
+    <condition property="package.root" value="/opt/package">
+        <os family="unix"/>
+    </condition>
+
+    <!--###########################################################-->
+    <!--## Clean targets                                         ##-->
+    <!--###########################################################-->
+    <target name="clean.all" depends="clean"/>
+
+    <target name="clean">
+        <delete>
+            <fileset dir="${dir.work}" includes="_*/**"/>
+        </delete>
+        <exec executable="sh">
+            <arg value="-c"/>
+            <arg value="rm -rf ${dir.work}/_*"/>
+        </exec>
+    </target>
+
+    <target name="clean.src">
+        <delete dir="${dir.src.root}"/>
+    </target>
+
+    <target name="clean.build">
+        <delete dir="${dir.build}"/>
+    </target>
+
+    <target name="version" description="build the webserver">
+        <antcall target="marknextversion"/>
+
+        <property name="wsversion" value="yes"/>
+        <antcall target="package"/>
+    </target>
+
+    <target name="marknextversion">
+        <buildnumber file="${dir.base}/version.file"/>
+    </target>
+
+    <!--###########################################################-->
+    <!--## Init  targets                                         ##-->
+    <!--###########################################################-->
+    <target name="init" unless="init.complete">
+        <condition property="isLinux">
+            <os name="Linux"/>
+        </condition>
+        <fail message="ERROR! Only run on Linux" unless="isLinux"/>
+
+        <property environment="env"/>
+        <available file="${env.JAVA_HOME}" property="set.java.home"/>
+
+        <exec outputproperty="java.version" executable="${env.JAVA_HOME}/bin/java">
+            <arg value="-version"/>
+        </exec>
+
+        <loadproperties srcFile="${dir.base}/version.file" encoding="utf8"/>
+        <condition property="build.version" value="${major.number}.${minor.number}.${build.number}">
+            <isset property="wsversion"/>
+        </condition>
+        <property name="build.version" value="0.0.0.0"/>
+
+        <echo message="build.version    = ${build.version}"/>
+        <echo message="java.home        = ${env.JAVA_HOME}"/>
+        <echo message="java.version     = ${java.version}"/>
+        <echo message="dir.work         = ${dir.work}"/>
+
+        <mkdir dir="${dir.logs}"/>
+        <mkdir dir="${dir.src.root}"/>
+        <mkdir dir="${dir.build}"/>
+
+        <!-- pcre, just get two properties -->
+        <exec outputproperty="file.src.pcre" executable="sh">
+            <arg value="-c"/>
+            <arg value="ls -d ${dir.archives}/nginx-pcre-*.tar.gz"/>
+        </exec>
+        <condition property="src.pcre.notrequired">
+            <and>
+                <available file="${dir.src.root.pcre}"/>
+                <not>
+                    <uptodate targetfile="${file.src.pcre}">
+                        <srcfiles dir="${dir.src.root.pcre}" includes="**"/>
+                    </uptodate>
+                </not>
+            </and>
+        </condition>
+        <condition property="build.pcre.notrequired">
+            <and>
+                <isset property="src.pcre.notrequired"/>
+                <uptodate targetfile="${dir.build.pcre}/lib/libpcre.so">
+                    <srcfiles dir="${dir.src.root.pcre}" includes="**"/>
+                </uptodate>
+            </and>
+        </condition>
+
+        <!-- nginx, just get two properties -->
+        <exec outputproperty="file.src.nginx" executable="sh">
+            <arg value="-c"/>
+            <arg value="ls -d ${dir.archives}/nginx-httpd-*.tar.gz"/>
+        </exec>
+
+        <condition property="src.nginx.notrequired">
+            <and>
+                <available file="${dir.src.root.nginx}"/>
+                <not>
+                    <uptodate targetfile="${file.src.nginx}">
+                        <srcfiles dir="${dir.src.root.nginx}" includes="**"/>
+                    </uptodate>
+                </not>
+            </and>
+        </condition>
+        <condition property="build.nginx.notrequired">
+            <and>
+                <isset property="src.nginx.notrequired"/>
+                <uptodate targetfile="${dir.build.nginx}/sbin/nginx">
+                    <srcfiles dir="${dir.src.root.nginx}" includes="**"/>
+                </uptodate>
+            </and>
+        </condition>
+
+        <!-- tomcat, just get two properties-->
+        <exec outputproperty="file.src.tomcat" executable="sh">
+            <arg value="-c"/>
+            <arg value="ls -d ${dir.archives}/tomcat-httpd-*.tar.gz"/>
+        </exec>
+        <condition property="src.tomcat.notrequired">
+            <and>
+                <available file="${dir.src.root.tomcat}"/>
+                <not>
+                    <uptodate targetfile="${file.src.tomcat}">
+                        <srcfiles dir="${dir.src.root.tomcat}" includes="**"/>
+                    </uptodate>
+                </not>
+            </and>
+        </condition>
+        <condition property="build.tomcat.notrequired">
+            <and>
+                <isset property="src.tomcat.notrequired"/>
+                <uptodate targetfile="${dir.build.tomcat}/">
+                    <srcfiles dir="${dir.src.root.tomcat}" includes="**"/>
+                </uptodate>
+            </and>
+        </condition>
+
+        <property name="init.complete" value="true"/>
+    </target>
+
+    <!-- pcre: configure, make, make test, make install-->
+    <target name="src.pcre" unless="src.pcre.notrequired" depends="init">
+        <delete dir="${dir.src.root.pcre}"/>
+        <mkdir dir="${dir.src.root.pcre}"/>
+
+        <exec executable="sh">
+            <arg value="-c"/>
+            <arg value="tar xzf ${file.src.pcre} -C ${dir.src.root.pcre}"/>
+        </exec>
+    </target>
+
+    <target name="build.pcre" unless="build.pcre.notrequired" depends="src.pcre">
+        <delete dir="${dir.build.pcre}"/>
+        <mkdir dir="${dir.build.pcre}"/>
+        <exec outputproperty="dir.src.pcre" executable="sh">
+            <arg value="-c"/>
+            <arg value="ls -d ${dir.src.root.pcre}/*"/>
+        </exec>
+
+        <!--configure-->
+        <echo message="pcre: configure"/>
+        <exec dir="${dir.src.pcre}" executable="sh" output="${dir.logs}/pcre_configure.log" failonerror="true">
+            <arg value="configure"/>
+            <arg value="--prefix=${dir.build.pcre}"/>
+        </exec>
+
+        <!--make-->
+        <echo message="pcre: make"/>
+        <exec dir="${dir.src.pcre}" executable="make" output="${dir.logs}/pcre_make.log" failonerror="true">
+        </exec>
+
+        <!--make install-->
+        <echo message="pcre: make install"/>
+        <exec dir="${dir.src.pcre}" executable="make" output="${dir.logs}/pcre_make_install.log"
+              failonerror="true">
+            <arg value="install"/>
+        </exec>
+    </target>
+
+    <target name="clean.src.pcre" depends="init">
+        <echo message="clean pcre src: ${dir.src.pcre}"/>
+        <delete dir="${dir.src.pcre}"/>
+    </target>
+
+    <target name="clean.build.pcre" depends="init">
+        <echo message="clean pcre build:${dir.build.pcre}"/>
+        <delete dir="${dir.build.pcre}"/>
+    </target>
+
+    <!-- nginx: configure, make, make test, make install-->
+    <target name="src.nginx" unless="src.nginx.notrequired" depends="init">
+        <delete dir="${dir.src.root.nginx}"/>
+        <mkdir dir="${dir.src.root.nginx}"/>
+
+        <exec executable="sh">
+            <arg value="-c"/>
+            <arg value="tar xzf ${file.src.nginx} -C ${dir.src.root.nginx}"/>
+        </exec>
+    </target>
+
+    <target name="build.nginx" unless="build.nginx.notrequired" depends="src.nginx,build.pcre">
+        <delete dir="${dir.build.nginx}"/>
+        <mkdir dir="${dir.build.nginx}"/>
+
+        <exec outputproperty="dir.src.nginx" executable="sh">
+            <arg value="-c"/>
+            <arg value="ls -d ${dir.src.root.nginx}/*"/>
+        </exec>
+
+        <!--configure-->
+        <echo message="nginx: configure"/>
+        <exec dir="${dir.src.nginx}" executable="sh" output="${dir.logs}/nginx_configure.log" failonerror="true">
+            <arg value="configure"/>
+            <arg value="--user=webops"/>
+            <arg value="--group=operators"/>
+            <arg value="--prefix=${dir.build.nginx}"/>
+            <arg value="--with-pcre=${dir.src.pcre}"/>
+            <arg value="--error-log-path=/opt/ops/deploydeploy/webserver/CURRENT/nginx/logs/error.log"/>
+            <arg value="--http-log-path=/opt/ops/deploydeploy/webserver/CURRENT/nginx/logs/access.log"/>
+            <arg value="--http-fastcgi-temp-path=/opt/ops/deploydeploy/webserver/CURRENT/nginx/fastcgi_temp"/>
+            <arg value="--http-client-body-temp-path=/opt/ops/deploydeploy/webserver/CURRENT/nginx/client_body_temp"/>
+            <arg value="--http-proxy-temp-path=/opt/ops/deploydeploy/webserver/CURRENT/nginx/proxy_body_temp"/>
+            <arg value="--http-scgi-temp-path=/opt/ops/deploydeploy/webserver/CURRENT/nginx/scgi_temp"/>
+            <arg value="--http-uwsgi-temp-path=/opt/ops/deploydeploy/webserver/CURRENT/nginx/uwsgi_temp"/>
+            <arg value="--with-http_ssl_module"/>
+            <arg value="--with-http_stub_status_module"/>
+            <arg value="--with-http_realip_module"/>
+            <arg value="--with-http_sub_module"/>
+            <arg value="--with-http_gzip_static_module"/>
+            <arg value="--with-http_flv_module"/>
+            <arg value="--with-http_dav_module"/>
+        </exec>
+
+        <!--make-->
+        <echo message="nginx: make"/>
+        <exec dir="${dir.src.nginx}" executable="make" output="${dir.logs}/nginx_make.log" failonerror="true">
+        </exec>
+
+        <!--make install-->
+        <echo message="nginx: make install"/>
+        <exec dir="${dir.src.nginx}" executable="make" output="${dir.logs}/nginx_make_install.log" failonerror="true">
+            <arg value="install"/>
+        </exec>
+    </target>
+
+    <target name="clean.src.nginx" depends="init">
+        <echo message="clean nginx src:${dir.src.nginx}"/>
+        <delete dir="${dir.src.nginx}"/>
+    </target>
+
+    <target name="clean.build.nginx" depends="init">
+        <echo message="clean nginx build:${dir.build.nginx}"/>
+        <delete dir="${dir.build.nginx}"/>
+    </target>
+
+    <!-- tomcat: untar and move -->
+    <target name="src.tomcat" unless="src.tomcat.notrequired" depends="init">
+        <delete dir="${dir.src.root.tomcat}"/>
+        <mkdir dir="${dir.src.root.tomcat}"/>
+        <exec executable="sh">
+            <arg value="-c"/>
+            <arg value="tar xzf ${file.src.tomcat} -C ${dir.src.root.tomcat}"/>
+        </exec>
+        <exec outputproperty="dir.src.tomcat" executable="sh">
+            <arg value="-c"/>
+            <arg value="ls -d ${dir.src.root.tomcat}/*"/>
+        </exec>
+    </target>
+
+    <target name="build.tomcat" unless="build.tomcat.notrequired" depends="src.tomcat">
+        <delete dir="${dir.build.tomcat}"/>
+        <mkdir dir="${dir.build.tomcat}"/>
+
+        <move todir="${dir.build.tomcat}">
+            <fileset dir="${dir.src.tomcat}"/>
+        </move>
+    </target>
+
+    <target name="clean.src.tomcat" depends="init">
+        <delete dir="${dir.src.tomcat}"/>
+    </target>
+
+    <target name="clean.build.tomcat" depends="init">
+        <delete dir="${dir.build.tomcat}"/>
+    </target>
+
+    <!--build the tomcat libs-->
+    <target name="build.lib" depends="build.tomcat">
+        <delete dir="${dir.build.lib}"/>
+        <mkdir dir="${dir.build.lib}"/>
+
+        <path id="path.tomcat.libs">
+            <fileset dir="${dir.build.tomcat}/lib">
+                <include name="**/*.jar"/>
+            </fileset>
+        </path>
+
+        <javac srcdir="${dir.src.lib}"
+               destdir="${dir.build.lib}"
+               debug="on"
+               includeantruntime="on"
+               optimize="off">
+            <classpath refid="path.tomcat.libs"/>
+        </javac>
+        <jar destfile="${dir.build.lib}/webapps-class-loader.jar" basedir="${dir.build.lib}">
+        </jar>
+    </target>
+
+    <!-- webapps -->
+    <target name="build.webserver" depends="build.pcre,build.nginx,build.tomcat,build.lib">
+        <delete dir="${dir.build.webserver}"/>
+        <mkdir dir="${dir.build.webserver}"/>
+
+        <!-- config templates -->
+        <mkdir dir="${dir.build.webserver}/templates"/>
+        <copy todir="${dir.build.webserver}/templates" overwrite="yes">
+            <fileset dir="${dir.templates}" includes="**/*" casesensitive="no"/>
+        </copy>
+
+        <copy todir="${dir.build.tomcat}/lib" file="${dir.build.lib}/webapps-class-loader.jar"/>
+
+        <!-- build layout of nginx -->
+        <mkdir dir="${dir.build.webserver}/nginx"/>
+        <mkdir dir="${dir.build.webserver}/nginx/sbin"/>
+        <mkdir dir="${dir.build.webserver}/nginx/conf"/>
+        <mkdir dir="${dir.build.webserver}/nginx/html"/>
+        <mkdir dir="${dir.build.webserver}/nginx/html/live"/>
+        <mkdir dir="${dir.build.webserver}/nginx/html/down"/>
+
+        <mkdir dir="${dir.build.webserver}/nginx/sbin"/>
+        <exec executable="sh">
+            <arg value="-c"/>
+            <arg value="cp -rf ${dir.build.nginx}/sbin/* ${dir.build.webserver}/nginx/sbin/"/>
+        </exec>
+
+        <!--copy the nginx default configure files.-->
+        <exec executable="sh">
+            <arg value="-c"/>
+            <arg value="cp -f ${dir.build.webserver}/nginx/conf/* ${dir.build.webserver}/nginx/conf"/>
+        </exec>
+
+        <!--patch nginx-->
+        <copy todir="${dir.build.webserver}/nginx" overwrite="yes">
+            <fileset dir="${dir.build.webserver}/templates/nginx/patch" includes="**/*" casesensitive="no"/>
+        </copy>
+
+        <!-- build layout of tomcat -->
+        <mkdir dir="${dir.build.webserver}/tomcat"/>
+
+        <!--tomcat server-->
+        <mkdir dir="${dir.build.webserver}/tomcat/lib"/>
+        <exec executable="sh">
+            <arg value="-c"/>
+            <arg value="cp -rf ${dir.build.tomcat}/lib/*
+                               ${dir.build.webserver}/tomcat/lib/"/>
+        </exec>
+
+        <!--tomcat bin-->
+        <mkdir dir="${dir.build.webserver}/tomcat/bin"/>
+        <exec executable="sh">
+            <arg value="-c"/>
+            <arg value="cp -rf ${dir.build.tomcat}/bin/*.jar
+                               ${dir.build.tomcat}/bin/*.sh
+                               ${dir.build.webserver}/tomcat/bin"/>
+        </exec>
+
+        <!--tomcat configure-->
+        <mkdir dir="${dir.build.webserver}/tomcat/conf"/>
+        <exec executable="sh">
+            <arg value="-c"/>
+            <arg value="cp -f ${dir.build.tomcat}/conf/*
+                              ${dir.build.webserver}/tomcat/conf"/>
+        </exec>
+
+        <delete dir="${dir.build.webserver}/tomcat/conf/Catalina/localhost"/>
+        <mkdir dir="${dir.build.webserver}/tomcat/conf/Catalina/localhost"/>
+        <exec executable="sh">
+            <arg value="-c"/>
+            <arg value="cp -f ${dir.build.tomcat}/conf/ROOT.xml
+                              ${dir.build.webserver}/tomcat/conf/Catalina/localhost"/>
+        </exec>
+
+        <mkdir dir="${dir.build.webserver}/tomcat/work"/>
+        <mkdir dir="${dir.build.webserver}/tomcat/temp"/>
+        <mkdir dir="${dir.build.webserver}/tomcat/webapps"/>
+
+        <!--patch tomcat-->
+        <copy todir="${dir.build.webserver}/tomcat" overwrite="yes">
+            <fileset dir="${dir.build.webserver}/templates/tomcat/patch" includes="**/*" casesensitive="no"/>
+        </copy>
+
+        <!-- new recli-->
+        <mkdir dir="${dir.build.webserver}/tomcat/newrelic"/>
+        <exec executable="sh">
+            <arg value="-c"/>
+            <arg value="cp -rf ${dir.build.tomcat}/newrelic/*
+                              ${dir.build.webserver}/tomcat/newrelic"/>
+        </exec>
+
+        <!--Copy two tomcat dir-->
+        <delete dir="${dir.build.webserver}/tomcat1"/>
+        <delete dir="${dir.build.webserver}/tomcat2"/>
+        <delete dir="${dir.build.webserver}/tomcat3"/>
+        <delete dir="${dir.build.webserver}/tomcat4"/>
+        <delete dir="${dir.build.webserver}/tomcat5"/>
+        <delete dir="${dir.build.webserver}/tomcat6"/>
+        <delete dir="${dir.build.webserver}/tomcat7"/>
+        <delete dir="${dir.build.webserver}/tomcat8"/>
+
+        <mkdir dir="${dir.build.webserver}/tomcat1"/>
+        <mkdir dir="${dir.build.webserver}/tomcat2"/>
+        <mkdir dir="${dir.build.webserver}/tomcat3"/>
+        <mkdir dir="${dir.build.webserver}/tomcat4"/>
+        <mkdir dir="${dir.build.webserver}/tomcat5"/>
+        <mkdir dir="${dir.build.webserver}/tomcat6"/>
+        <mkdir dir="${dir.build.webserver}/tomcat7"/>
+        <mkdir dir="${dir.build.webserver}/tomcat8"/>
+
+        <copy todir="${dir.build.webserver}/tomcat1" overwrite="yes">
+            <fileset dir="${dir.build.webserver}/tomcat" includes="**/*" casesensitive="no"/>
+        </copy>
+
+        <copy todir="${dir.build.webserver}/tomcat2" overwrite="yes">
+            <fileset dir="${dir.build.webserver}/tomcat" includes="**/*"/>
+        </copy>
+
+        <copy todir="${dir.build.webserver}/tomcat3" overwrite="yes">
+            <fileset dir="${dir.build.webserver}/tomcat" includes="**/*"/>
+        </copy>
+
+        <copy todir="${dir.build.webserver}/tomcat4" overwrite="yes">
+            <fileset dir="${dir.build.webserver}/tomcat" includes="**/*"/>
+        </copy>
+
+        <copy todir="${dir.build.webserver}/tomcat5" overwrite="yes">
+            <fileset dir="${dir.build.webserver}/tomcat" includes="**/*"/>
+        </copy>
+
+        <copy todir="${dir.build.webserver}/tomcat6" overwrite="yes">
+            <fileset dir="${dir.build.webserver}/tomcat" includes="**/*"/>
+        </copy>
+
+        <copy todir="${dir.build.webserver}/tomcat7" overwrite="yes">
+            <fileset dir="${dir.build.webserver}/tomcat" includes="**/*"/>
+        </copy>
+
+        <copy todir="${dir.build.webserver}/tomcat8" overwrite="yes">
+            <fileset dir="${dir.build.webserver}/tomcat" includes="**/*"/>
+        </copy>
+
+        <delete dir="${dir.build.webserver}/tomcat"/>
+    </target>
+
+    <target name="clean.build.webapps" depends="init">
+        <delete dir="${dir.build.webserver}"/>
+    </target>
+
+    <target name="package" depends="build.webserver">
+        <chmod perm="750" type="dir" dir="${dir.build.webserver}" includes="**/*"/>
+        <chmod perm="640" type="file" dir="${dir.build.webserver}" includes="**/*"/>
+
+        <chmod perm="755" type="file" dir="${dir.build.webserver}/nginx/sbin" includes="**/*"/>
+
+        <chmod perm="755" type="file" dir="${dir.build.webserver}/tomcat1/bin" includes="**/*.sh"/>
+        <chmod perm="755" type="file" dir="${dir.build.webserver}/tomcat2/bin" includes="**/*.sh"/>
+        <chmod perm="755" type="file" dir="${dir.build.webserver}/tomcat3/bin" includes="**/*.sh"/>
+        <chmod perm="755" type="file" dir="${dir.build.webserver}/tomcat4/bin" includes="**/*.sh"/>
+        <chmod perm="755" type="file" dir="${dir.build.webserver}/tomcat4/bin" includes="**/*.sh"/>
+        <chmod perm="755" type="file" dir="${dir.build.webserver}/tomcat5/bin" includes="**/*.sh"/>
+        <chmod perm="755" type="file" dir="${dir.build.webserver}/tomcat6/bin" includes="**/*.sh"/>
+        <chmod perm="755" type="file" dir="${dir.build.webserver}/tomcat8/bin" includes="**/*.sh"/>
+
+        <mkdir dir="${package.root}/webserver"/>
+        <tar destfile="${package.root}/webserver/${build.version}.tar" longfile="warn">
+            <tarfileset dir="${dir.build.webserver}">
+                <include name="**/**"/>
+            </tarfileset>
+        </tar>
+    </target>
+</project>

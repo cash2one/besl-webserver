@@ -1,0 +1,20 @@
+    #主站
+    log_format  joyme  '"$remote_addr" "$time_local" "$status" "$body_bytes_sent" "$request_method" "$http_host$request_uri" "$request_body"  "$http_referer" "$upstream_addr" "request:$request_time"  "response:$upstream_response_time"   "$http_user_agent" "$http_x_forwarded_for" "$cookie_jmuc_u" "$cookie_jmuc_appkey" "$cookie_jmuc_uno" "$cookie_jmst_ssid" "$cookie_jmst_glid"';
+
+    log_format  j0y  '"$remote_addr" "$time_local" "$status" "$body_bytes_sent" "$request_method" "$http_host$request_uri" "$request_body"  "$http_referer" "$upstream_addr" "request:$request_time"  "response:$upstream_response_time"   "$http_user_agent" "$http_x_forwarded_for" "$cookie_jmuc_u" "$cookie_jmuc_appkey" "$cookie_jmuc_uno" "$cookie_jmst_ssid" "$cookie_jmst_glid"';
+
+    log_format  lib  '"$remote_addr" "$time_local" "$status" "$body_bytes_sent" "$request_method" "$http_host$request_uri" "$request_body"  "$http_referer" "$upstream_addr" "request:$request_time"  "response:$upstream_response_time"   "$http_user_agent" "$http_x_forwarded_for" "$cookie_jmuc_u" "$cookie_jmuc_appkey" "$cookie_jmuc_uno" "$cookie_jmst_ssid" "$cookie_jmst_glid"';
+
+    log_format  tools  '"$remote_addr" "$time_local" "$status" "$body_bytes_sent" "$request_method" "$http_host$request_uri" "$request_body"  "$http_referer" "$upstream_addr" "request:$request_time"  "response:$upstream_response_time"   "$http_user_agent" "$http_x_forwarded_for" "$cookie_jmuc_u" "$cookie_jmuc_appkey" "$cookie_jmuc_uno" "$cookie_jmst_ssid" "$cookie_jmst_glid"';
+
+    log_format  html  '"$remote_addr" "$time_local" "$status" "$body_bytes_sent" "$request_method" "$http_host$request_uri" "$request_body"  "$http_referer" "$upstream_addr" "request:$request_time"  "response:$upstream_response_time"   "$http_user_agent" "$http_x_forwarded_for" "$cookie_jmuc_u" "$cookie_jmuc_appkey" "$cookie_jmuc_uno" "$cookie_jmst_ssid" "$cookie_jmst_glid"';
+                  
+    log_format  discuz  '"$remote_addr" "$time_local" "$status" "$body_bytes_sent" "$request_method" "$http_host$request_uri" "$request_body"  "$http_referer" "$upstream_addr" "request:$request_time"  "response:$upstream_response_time"   "$http_user_agent" "$http_x_forwarded_for" "$cookie_jmuc_u" "$cookie_jmuc_appkey" "$cookie_jmuc_uno" "$cookie_jmst_ssid" "$cookie_jmst_glid"';
+
+    log_format  res  '"$remote_addr" "$time_local" "$status" "$body_bytes_sent" "$request_method" "$http_host$request_uri" ""  "$http_referer" "request:$request_time"  "response:$upstream_response_time"   "$http_user_agent" "$http_x_forwarded_for" "$cookie_jmuc_u" "$cookie_jmuc_appkey" "$cookie_jmuc_uno" "$cookie_jmst_ssid" "$cookie_jmst_glid" "$cookie_jmst_ssid" "$cookie_jmst_glid"';
+
+    #api接口
+    log_format  api  '"$remote_addr" "$time_local" "$status" "$body_bytes_sent" "$request_method" "$http_host$request_uri" "$request_body" "header:$http_JParam"  "$http_referer" "request:$request_time"  "response:$upstream_response_time"   "$http_user_agent" "$http_x_forwarded_for" "$cookie_jmuc_u" "$cookie_jmuc_appkey" "$cookie_jmuc_uno" "$cookie_jmst_ssid" "$cookie_jmst_glid"';
+
+    #优酷游戏中心
+    log_format  youku  '"$remote_addr" "$time_local" "$status" "$body_bytes_sent" "$request_method" "$http_host$request_uri" "$request_body" "$http_JParam"  "$http_referer" "request:$request_time"  "response:$upstream_response_time"   "$http_user_agent" "$http_x_forwarded_for" "$cookie_jmuc_u" "$cookie_jmuc_appkey" "$cookie_jmuc_uno" "$cookie_idfa" "$cookie_jmst_ssid" "$cookie_jmst_glid"';

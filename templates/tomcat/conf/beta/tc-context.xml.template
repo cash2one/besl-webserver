@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!-- The contents of this file will be loaded for each web application -->
+<Context path="/" docBase="@WEBAPPS_DIR@" privileged="true" reloadable="false" sessionCookiePath="/" sessionCookieDomain="@SESSION_DOMAIN@">
+
+    <Manager pathname=""/>
+
+    <Loader className="com.fivewh.webapps.tomcat7.loader.FiveWebappLoader" debug="true"
+            extraRepositories="@DEPLOY_BASE@/classes,@DEPLOY_BASE@/lib,@DEPLOY_BASE@/relatedjars"/>
+            
+    <Listener className="com.fivewh.webapps.tomcat7.listener.FiveLifecycleListener" debug="true" 
+            envProps="@ENV_FILE@" servProps="@SERV_FILE@"/>
+</Context>

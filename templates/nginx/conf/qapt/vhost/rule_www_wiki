@@ -1,0 +1,4 @@
+
+if ( $request_uri ~ ^/wiki(/m?wiki)*/(mds|hjhzlz|qmws|hyrz|tkzhg|vg|wd|hsqj|stzb|snsgz|gosl|wldy|jz|6l|ppsg|ms|yzqx|ylzl|xj|wshy|wiz|txhd|ttlz|ttltf|ttfzl|ttfw|ttcq|ttaxc|tgdrrpg|smdl|shyxz|qtds|qqs|qmtj|qmqj|qmnc|qmfjdz|qmdgs|qmctx|qhero|my|mt2|ml|ldxy|jjdmw|hzdld|hycs|hlxy|hlddz|hh|dxcb|dtdg|ds|dqmsl|cblw|bwm|sq|jianglin|yxs|bwlb3|kof98|xhzs|xhzs|rxcq|lt|ttkp|qjnn|krsma|zjsn|dtcq) ) {
+    rewrite ^/wiki(/m?wiki)*/(.*) http://wiki.joyme.com/$2 permanent;
+}

@@ -1,0 +1,354 @@
+#group and user.
+#user  @NGINX_USER@ @NGINX_GROUP@;
+
+#the processes
+worker_processes  4;
+
+#error files
+error_log  /home/ops/deploy/webserver/CURRENT/nginx/logs/error.log;
+
+#pid setting.
+pid        /home/ops/deploy/webserver/CURRENT/nginx/nginx.pid;
+
+#
+events {
+    use epoll;
+    worker_connections  51200;
+}
+
+#
+http {
+    include       mime.types;
+    default_type  text/html;
+
+ server_names_hash_bucket_size   128;
+    client_header_buffer_size       256k;
+    large_client_header_buffers     32 64k;
+    client_max_body_size            8m;
+        resolver 10.170.234.88;
+
+    ##
+    sendfile       on;
+    tcp_nopush     on;
+
+    #the header name has underscores
+    underscores_in_headers on;
+
+    #keepalive_timeout  0;
+    keepalive_timeout  60;
+
+    ##
+    tcp_nodelay on;
+
+    #gzip setting.
+    gzip                on;
+    gzip_min_length     1k;
+    gzip_buffers        4 16k;
+    gzip_http_version   1.0;
+    gzip_comp_level     6;
+    gzip_proxied        any;
+    gzip_types          text/plain application/x-javascript text/css application/xml  application/xml+rss text/javascript;
+    gzip_vary           on;
+    #proxxy setting.
+
+
+    #upstream setting.
+    upstream java_www_pool {
+        ip_hash;
+        server alyweb007.prod:8081;
+        server alyweb008.prod:8081;
+    }
+
+    upstream java_tools_pool {
+        ip_hash;
+        server alyweb007.prod:8082;
+	server alyweb008.prod:8082;
+    }
+
+upstream marticle_cms_pool {
+    ip_hash;
+    server alyweb007.prod:18080;
+  }
+
+    upstream wiki_pool {
+       ip_hash;
+       server alyweb007.prod:28080;
+    }
+
+    upstream cmsimage_pool {
+       ip_hash;
+       server alyweb007.prod:48080;
+    }
+
+     upstream java_image_pool01 {
+         ip_hash;
+         server alyweb007.prod:8083;
+
+     }
+
+     upstream java_image_pool02 {
+         ip_hash;
+         server alyweb008.prod:8083;
+     }
+
+
+      upstream webcache_pool {
+            server alyweb007.prod:58088;
+       }
+
+
+    #the log format
+    include 	logformats;
+
+    server{
+        listen          8000;
+        server_name     www.joyme.beta shuang11.joyme.beta passport.joyme.beta servapi.joyme.beta;
+        index           index.jsp index.html index.htm;
+        root            @NGINX_HTDOCS_ROOT@;
+    
+         set $ismob 0;
+	      		if ( $http_user_agent ~ "^((.*MIDP.*)|(.*WAP.*)|(.*UP.Browser.*)|(.*Smartphone.*)|(.*Obigo.*)|(.*Mobile.*)|(.*AU.Browser.*)|(.*wxd.Mms.*)|(.*WxdB.Browser.*)|(.*CLDC.*)|(.*UP.Link.*)|(.*KM.Browser.*)|(.*UCWEB.*)|(.*SEMC\-Browser.*)|(.*Mini.*)|(.*Symbian.*)|(.*Palm.*)|(.*Nokia.*)|(.*Panasonic.*)|(.*MOT\-.*)|(.*SonyEricsson.*)|(.*NEC\-.*)|(.*Alcatel.*)|(.*Ericsson.*)|(.*BENQ.*)|(.*BenQ.*)|(.*Amoisonic.*)|(.*Amoi\-.*)|(.*Capitel.*)|(.*PHILIPS.*)|(.*SAMSUNG.*)|(.*Lenovo.*)|(.*Mitsu.*)|(.*Motorola.*)|(.*SHARP.*)|(.*WAPPER.*)|(.*LG\-.*)|(.*LG/.*)|(.*EG900.*)|(.*CECT.*)|(.*Compal.*)|(.*kejian.*)|(.*Bird.*)|(.*BIRD.*)|(.*G900/V1.0.*)|(.*Arima.*)|(.*CTL.*)|(.*TDG.*)|(.*Daxian.*)|(.*DAXIAN.*)|(.*DBTEL.*)|(.*Eastcom.*)|(.*EASTCOM.*)|(.*PANTECH.*)|(.*Dopod.*)|(.*Haier.*)|(.*HAIER.*)|(.*KONKA.*)|(.*KEJIAN.*)|(.*LENOVO.*)|(.*Soutec.*)|(.*SOUTEC.*)|(.*SAGEM.*)|(.*SEC\-.*)|(.*SED\-.*)|(.*EMOL\-.*)|(.*INNO55.*)|(.*ZTE.*)|(.*iPhone.*)|(.*Android.*)|(.*Windows CE.*)|(Wget.*)|(Java.*)|(curl.*)|(Opera.*))$" ){
+		         			set $ismob 1;
+	      		}
+	
+	      		if ( $http_user_agent ~ ^$ ){
+	 	       			set $ismob 1;
+	      		}
+	      		
+	      		set $mnote 0;
+	      		if ($request_uri ~ ^/note  ){
+		       			set $mnote "${mnote}${ismob}";
+	      		}
+	      		
+	      		set $mshare 0;
+	      		if ($request_uri ~ ^/share  ){
+		       			set $mshare "${mshare}${ismob}";
+	      		}
+	      		
+	      		set $mlogin 0;
+	      		if ($request_uri ~ ^/login  ){
+		       			set $mlogin "${mlogin}${ismob}";
+	      		}
+
+	      		if ( $mshare = "01" ){
+	      			 rewrite ^/([^/]*)/(.*)$ http://www.joyme.beta/m$1/$2 last;
+	      		}
+	      
+	      		if ( $mlogin = "01" ){
+	      			 rewrite ^/loginpage(.*)$ http://www.joyme.beta/mloginpage$1 last;
+	      		}
+	      		
+        if ( $host = 'shuang11.joyme.beta' ) {
+             rewrite ^/(.*)$ /event/shuang11/page last;
+   	    }
+   	    
+        if ($host = 'joyme.beta' ) {
+      			rewrite ^/(.*)$ http://www.joyme.beta/$1 permanent;
+   			}     
+   			
+
+        fastcgi_intercept_errors    on;
+        error_page                  502 = http://lib.joyme.beta/502.html;
+        error_page                  403 = /50x.html;
+
+        location ^~/ {
+			
+     		index index.jsp;
+
+            proxy_pass  http://java_www_pool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffers            32 8k;
+        }
+
+         location /marticle {
+            index index.shtml index.php;
+
+            proxy_pass  http://marticle_cms_pool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+            proxy_set_header         channel    360;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffers            32 8k;
+						                    
+        } 
+
+        include vhost/vhost_tempwikiurl;
+
+
+ location /wiki {
+
+            proxy_pass  http://wiki_pool/wiki;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffers            32 8k;
+        }
+
+        location /mwiki {
+
+            proxy_pass  http://wiki_pool/mwiki;
+
+                    proxy_redirect           off;
+                    proxy_set_header         Host            $host;
+                    proxy_set_header         X-Real-IP       $remote_addr;
+                    proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+                    client_max_body_size     10m;
+                    client_body_buffer_size  256k;
+
+                    proxy_connect_timeout    300;
+                    proxy_send_timeout       300;
+                    proxy_read_timeout       300;
+                    proxy_buffers            32 8k;
+        }
+      
+
+        location /50x.html {
+            root @NGINX_HTDOCS_ROOT@;
+        }
+
+        location /images {
+            root @NGINX_HTDOCS_ROOT@;
+            allow all;
+        }
+                 access_log  /home/ops/deploy/webserver/CURRENT/nginx/logs/access_joyme.log  joyme;
+       }
+
+    server{
+        listen          8000;
+        server_name     j0y.beta joy.beta;
+        root            @NGINX_HTDOCS_ROOT@;
+
+        fastcgi_intercept_errors    on;
+        error_page                  404 403 502 = http://www.joyme.beta;
+
+        location ^~/ {
+            index index.jsp;
+
+            proxy_pass  http://java_www_pool/shorturl/;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffers            32 8k;
+        }
+
+        access_log /home/ops/deploy/webserver/CURRENT/nginx/logs/access_j0y.log j0y;
+    }
+
+    server{
+        listen       8000;
+        server_name  lib.joyme.beta;
+
+        index        index.html index.htm;
+        #root         @NGINX_HTDOCS_ROOT@;
+
+        location ^~ /static/ {
+            root @NGINX_HTDOCS_ROOT@;
+        }
+
+        location ^~ /hotdeploy/static/ {
+            root @NGINX_HTDOCS_ROOT@;
+        }
+
+        location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$ {
+            expires      30d;
+        }
+
+        location ~ .*\.(js|css)?$ {
+            expires      1h;
+        }
+
+        access_log  /home/ops/deploy/webserver/CURRENT/nginx/logs/access_lib.log  lib;
+    }
+
+    server {
+        listen          8000;
+        server_name     status.joyme.beta;
+
+        location /nginx_status {
+		    allow 221.123.189.2;
+            allow 192.168.0.0/16;
+            allow 60.169.24.48;
+            allow 60.169.24.71;
+            deny all;
+	  
+            stub_status on;
+            access_log   off;
+        }
+    }
+
+        include vhost/vhost_article;
+        include vhost/vhost_bbs;
+        include vhost/vhost_hezuo;
+        include vhost/vhost_zozoka;
+        include vhost/vhost_res;
+        include vhost/vhost_tools;
+        include vhost/vhost_marticle;
+        include vhost/vhost_wiki;
+        include vhost/vhost_search;
+        include vhost/vhost_subdomain_wiki_php;
+        include vhost/vhost_joymewiki;
+        include vhost/vhost_api;
+        include vhost/vhost_node_beta;
+
+}

@@ -1,0 +1,46 @@
+set $ismob 0;
+if ( $http_user_agent ~ "^((.*MIDP.*)|(.*WAP.*)|(.*UP.Browser.*)|(.*Smartphone.*)|(.*Obigo.*)|(.*AU.Browser.*)|(.*wxd.Mms.*)|(.*WxdB.Browser.*)|(.*CLDC.*)|(.*UP.Link.*)|(.*KM.Browser.*)|(.*UCWEB.*)|(.*SEMC\-Browser.*)|(.*Mini.*)|(.*Symbian.*)|(.*Palm.*)|(.*Nokia.*)|(.*Panasonic.*)|(.*MOT\-.*)|(.*SonyEricsson.*)|(.*NEC\-.*)|(.*Alcatel.*)|(.*Ericsson.*)|(.*BENQ.*)|(.*BenQ.*)|(.*Amoisonic.*)|(.*Amoi\-.*)|(.*Capitel.*)|(.*PHILIPS.*)|(.*SAMSUNG.*)|(.*Lenovo.*)|(.*Mitsu.*)|(.*Motorola.*)|(.*SHARP.*)|(.*WAPPER.*)|(.*LG\-.*)|(.*LG/.*)|(.*EG900.*)|(.*CECT.*)|(.*Compal.*)|(.*kejian.*)|(.*Bird.*)|(.*BIRD.*)|(.*G900/V1.0.*)|(.*Arima.*)|(.*CTL.*)|(.*TDG.*)|(.*Daxian.*)|(.*DAXIAN.*)|(.*DBTEL.*)|(.*Eastcom.*)|(.*EASTCOM.*)|(.*PANTECH.*)|(.*Dopod.*)|(.*Haier.*)|(.*HAIER.*)|(.*KONKA.*)|(.*KEJIAN.*)|(.*LENOVO.*)|(.*Soutec.*)|(.*SOUTEC.*)|(.*SAGEM.*)|(.*SEC\-.*)|(.*SED\-.*)|(.*EMOL\-.*)|(.*INNO55.*)|(.*ZTE.*)|(.*iPhone.*)|(.*Android.*)|(.*Windows CE.*)|(Wget.*)|(Java.*)|(curl.*)|(Opera.*)|(.*Transcoder.*))$" ){
+        set $ismob 1;
+}
+
+if ( $http_user_agent ~ ^$ ){
+        set $ismob 1;
+}
+
+set $isred 0;
+if ($request_uri ~ /wiki/(.*)shtml\??$ ) {
+        set $isred "${ismob}1";
+}
+
+set $isred 0;
+if ($request_uri ~ ^/([^/]*)shtml\??$ ) {
+        set $isred "${ismob}1";
+}
+
+if ($request_uri = / ) {
+        set $isred '${ismob}1';
+}
+
+if ($request_uri ~ ^/\?? ) {
+        set $isred '${ismob}1';
+}
+
+if ($request_uri ~ mwiki){
+	set $isred '${ismob}0';
+}
+
+if ($request_uri ~ wxwiki){
+        set $isred '${ismob}0';
+}
+
+if ($request_uri ~ youkuwiki){
+        set $isred '${ismob}0';
+}
+
+if ( $isred = '11' ){
+        rewrite ".*/(.*shtml)?$" http://www.joyme.com/mwiki/$wkey/$1;
+}
+
+location ^~/index.shtml {
+     rewrite ^/(.*)$ http://www.joyme.com permanent;
+}

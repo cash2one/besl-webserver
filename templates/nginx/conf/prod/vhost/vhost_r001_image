@@ -1,0 +1,19 @@
+server{
+        listen          80;
+        server_name     r001.joyme.com;
+        index           index.htm index.html;
+        root            /opt/uploads/upload;
+
+        fastcgi_intercept_errors    on;
+        error_page                  302 404 403 502 = http://www.joyme.com/static/;
+
+        location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|JPG|JPEG|PNG)$ {
+            expires      30d;
+        }
+
+        location ~ .*\.(js|css)?$ {
+            expires      1h;
+        }
+
+        access_log /home/ops/deploy/webserver/CURRENT/nginx/logs/access_pic.log joyme;
+    }

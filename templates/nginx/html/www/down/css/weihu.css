@@ -1,0 +1,45 @@
+@charset "utf-8";
+body{text-align:center; margin:0 auto; font-family:arial,helvetica,sans-serif,'microsoft yahei','宋体'; padding:0;  font-size:12px; color:#555;background-color:#2a2927; line-height:1.6;height: 100%;}
+body > div{text-align:center; margin-right:auto; margin-left:auto;} 
+div,form,ul,ol,li,dl,dd,dt,span,p{margin:0; padding:0; border:0; list-style:none;}
+em,b{ font-style:normal; font-weight:normal;}
+img,a img{border:0; margin:0; padding:0;}
+h1,h2,h3,h4,h5{border:0; margin:0; padding:0;}
+input{outline: medium none;}
+textarea{resize: none;}
+#login{ width:1000px; margin:0 auto;min-height: 100%; position:relative; _height:100%;}
+html { overflow-x: hidden;overflow-y: auto;height: 100%;}
+.login_zm{width:1000px;  margin:0 auto; position:relative;}
+
+
+.reg_zm{width:1000px;  margin:0 auto; position:relative; padding:170px 0 0 0;}
+.reg_logo{ width:324px; height:102px; margin:80px 0 0 110px; display:inline; float:left; background:url(/img/loginbg.png) no-repeat; _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true, sizingMethod=scale, src='http://172.16.75.112/img/loginbg.png');_background-image:none;}
+.reg_cont{ float:left; width:400px; margin:60px 0 0 70px; display:inline;}
+.reg_cont h3{ font-size:16px; font-weight:normal; text-align:left; color:#fff;font-family:'microsoft yahei'; margin-bottom:20px;}
+.reg_cont .login_bg2{ margin:0 0 20px 0;}
+.reg_cont .login_bg1{ margin:0 0 30px 0;}
+.reg_cont a.regbut{ background:url(/img/logincontbg.png) 0 -250px no-repeat;width:164px; clear:left; height:33px; border:0; cursor:pointer; float:left; margin:20px 0 0 42px; display:inline; text-indent:-9999px;}
+.reg_cont a.regbut:hover{ background-position:0 -290px;}
+.joyme{ width:132px; height:26px; background:url(/img/joyme.png) no-repeat;  _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true, sizingMethod=scale, src='http://172.16.75.112/img/joyme.png');_background-image:none; float:left; margin:12px 0 0 5px; display:inline;}
+.text_true{ width:14px; height:13px; background:url(/img/logincontbg.png) 0 -335px no-repeat; position:absolute; right:-22px; top:14px; z-index:9999;}
+.invite_text{ width:450px; height:166px; background:url(/img/logincontbg.png) 0 -455px no-repeat;  float:left; margin:20px 0 0 41px; display:inline; position:relative;}
+.invite_text textarea{width:326px; height:156px; color:#b9b5b5; font-size:14px; padding:3px; border:0;  float:left; margin:3px 0 0 3px; display:inline;font-family:'microsoft yahei'; line-height:1.4; overflow-y:hidden;}
+.reg_cont a.invite{ background:url(/img/logincontbg.png) 0 -365px no-repeat;width:164px; clear:left; height:33px; border:0; cursor:pointer; float:left; margin:20px 0 0 140px; display:inline; text-indent:-9999px;}
+.reg_cont a.invite:hover{ background-position:0 -404px;}
+.invite_text span{ float:left; color:#fff; margin:150px 0 0 10px; display:inline;}
+.invite_text span b{ color:#86b32c;}
+#footer{ width:100%; height:20px; clear:both; color:#525150; margin-top:-20px; line-height:20px;  position:relative; text-align:center}
+#footer span{ padding:0 10px;}
+#footer span a{text-decoration:none; color:#525150;}
+#footer span a:hover{ text-decoration:none;color:#dedede;}
+.zm_provision{float:left; clear:left; margin-top:-22px; color:#ccc;}
+.zm_provision input{ position:relative; top:2px;}
+.zm_provision a{color:#ccc; text-decoration:none;}
+.zm_provision a:hover{ text-decoration:underline}
+/*w*/
+.ceshi{width:1000px;text-align:center; margin:0px auto;}
+.ceshilogo{width:324px; height:102px; margin:0px auto; background:url(/img/loginbg.png) no-repeat; _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true, sizingMethod=scale, src='http://172.16.75.112/img/loginbg.png');_background-image:none;}
+.textpng{width:411px; height:32px; margin:0px auto; background:url(/img/text.png) no-repeat; _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true, sizingMethod=scale, src='http://172.16.75.112/img/text.png');_background-image:none;margin-top:30px;}
+.weihu{width:469px; height:38px; margin:0px auto; background:url(/img/weihu.png) no-repeat; _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true, sizingMethod=scale, src='http://172.16.75.112/img/weihu.png');_background-image:none;margin-top:45px;}
+
+

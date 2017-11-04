@@ -1,0 +1,176 @@
+server {
+    listen       8000;
+    server_name  ~^(.+)?\.joyme\.com$;
+    index        index.html index.htm index.php;
+    root         /opt/www/wiki/prod;
+
+
+
+    set $wkey $1;
+    include ../conf/sub_mobile_function;
+
+  if ($request_uri = '/' ) {
+  	rewrite .* http://www.joyme.com/wiki/$wkey/ permanent;
+  }
+
+  if ($request_uri = '' ) {
+  	rewrite .* http://www.joyme.com/wiki/$wkey/ permanent;
+    }
+
+   location ^~/images/ {
+        rewrite ^/images/(.*)$ http://msimg.joyme.com/images/$1 permanent;
+        access_log  /opt/servicelogs/nginx/wiki_images.log joyme;
+   }
+
+   location ^~/loadphp/{
+     rewrite . /loadcache.php?uri last;
+   }
+
+   location ^~/wiki/ {
+     index index.php;
+     error_page 404 403 = @mediawiki;
+   }
+
+    location ~ .*\.(php|php5)?$ {
+      fastcgi_pass  127.0.0.1:9000;
+      fastcgi_index index.php;
+      fastcgi_param  SCRIPT_FILENAME  /opt/www/wiki/prod$fastcgi_script_name;
+      include        fastcgi_params;
+    }
+
+    location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$ {
+      expires      365d;
+    }
+
+    location ~ .*\.(js|css)?$ {
+      #expires      365d;
+      add_header Cache-Control no-cache;
+      add_header Cache-Control private;
+    }
+
+   location @mediawiki {
+     rewrite ^/([^?]*)(?:\?(.*))? /index.php?title=$1&$2 last;
+   }
+
+   location / {
+            index index.shtml index.jsp;
+
+            proxy_pass  http://java_nwikipool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the cleint info headers
+            proxy_set_header         m_serial        $http_m_serial;
+           
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size                   128k;
+            proxy_buffers            32 32k;
+   }
+
+   location /mwiki {
+            index index.shtml index.jsp;
+
+            proxy_pass  http://java_nwikipool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the cleint info headers
+            proxy_set_header         m_serial        $http_m_serial;
+            proxy_set_header         channel default;
+            proxy_set_header         wikitype mwiki;
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size                   128k;
+            proxy_buffers            32 32k;
+   }
+
+   location /wxwiki/ {
+            index index.shtml index.jsp;
+
+            proxy_pass  http://java_nwikipool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the cleint info headers
+            proxy_set_header         m_serial        $http_m_serial;
+	    proxy_set_header         channel wx;
+            proxy_set_header         wikitype mwiki;
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size                   128k;
+            proxy_buffers            32 32k;
+   }
+
+   location /appwiki/ {
+            index index.shtml index.jsp;
+
+            proxy_pass  http://java_nwikipool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the cleint info headers
+            proxy_set_header         m_serial        $http_m_serial;
+            proxy_set_header         channel app;
+            proxy_set_header         wikitype mwiki;
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size                   128k;
+            proxy_buffers            32 32k;
+   }
+
+   location /youkuwiki/ {
+            index index.shtml index.jsp;
+
+            proxy_pass  http://java_nwikipool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the cleint info headers
+            proxy_set_header         m_serial        $http_m_serial;
+            proxy_set_header         channel youku;
+            proxy_set_header         wikitype mwiki;
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size                   128k;
+            proxy_buffers            32 32k;
+   }
+
+   access_log  /opt/servicelogs/nginx/access_wiki.log joyme;
+}

@@ -1,0 +1,226 @@
+location /marvel/{
+if ($request_uri = '/marvel/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/marvel/' ) {
+rewrite /marvel/(.*)$   /$1  break;
+}
+proxy_pass    http://marvel.joyme.com;
+}
+location /angrybirds/{
+if ($request_uri = '/angrybirds/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/angrybirds/' ) {
+rewrite /angrybirds/(.*)$   /$1  break;
+}
+proxy_pass    http://angrybirds.joyme.com;
+}
+location /gintama/{
+if ($request_uri = '/gintama/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/gintama/' ) {
+rewrite /gintama/(.*)$   /$1  break;
+}
+proxy_pass    http://gintama.joyme.com;
+}
+location /yumaoqiu/{
+if ($request_uri = '/yumaoqiu/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/yumaoqiu/' ) {
+rewrite /yumaoqiu/(.*)$   /$1  break;
+}
+proxy_pass    http://yumaoqiu.joyme.com;
+}
+location /singer/{
+if ($request_uri = '/singer/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/singer/' ) {
+rewrite /singer/(.*)$   /$1  break;
+}
+proxy_pass    http://singer.joyme.com;
+}
+location /samurai/{
+if ($request_uri = '/samurai/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/samurai/' ) {
+rewrite /samurai/(.*)$   /$1  break;
+}
+proxy_pass    http://samurai.joyme.com;
+}
+location /pvz/{
+if ($request_uri = '/pvz/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/pvz/' ) {
+rewrite /pvz/(.*)$   /$1  break;
+}
+proxy_pass    http://pvz.joyme.com;
+}
+location /naruto/{
+if ($request_uri = '/naruto/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/naruto/' ) {
+rewrite /naruto/(.*)$   /$1  break;
+}
+proxy_pass    http://naruto.joyme.com;
+}
+location /klyx/{
+if ($request_uri = '/klyx/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/klyx/' ) {
+rewrite /klyx/(.*)$   /$1  break;
+}
+proxy_pass    http://klyx.joyme.com;
+}
+location /jc/{
+if ($request_uri = '/jc/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/jc/' ) {
+rewrite /jc/(.*)$   /$1  break;
+}
+proxy_pass    http://jc.joyme.com;
+}
+location /hmm/{
+if ($request_uri = '/hmm/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/hmm/' ) {
+rewrite /hmm/(.*)$   /$1  break;
+}
+proxy_pass    http://hmm.joyme.com;
+}
+location /halo/{
+if ($request_uri = '/halo/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/halo/' ) {
+rewrite /halo/(.*)$   /$1  break;
+}
+proxy_pass    http://halo.joyme.com;
+}
+location /fate/{
+if ($request_uri = '/fate/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/fate/' ) {
+rewrite /fate/(.*)$   /$1  break;
+}
+proxy_pass    http://fate.joyme.com;
+}
+location /dol5/{
+if ($request_uri = '/dol5/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/dol5/' ) {
+rewrite /dol5/(.*)$   /$1  break;
+}
+proxy_pass    http://dol5.joyme.com;
+}
+location /dc/{
+if ($request_uri = '/dc/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/dc/' ) {
+rewrite /dc/(.*)$   /$1  break;
+}
+proxy_pass    http://dc.joyme.com;
+}
+location /bwlb/{
+if ($request_uri = '/bwlb/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/bwlb/' ) {
+rewrite /bwlb/(.*)$   /$1  break;
+}
+proxy_pass    http://bwlb.joyme.com;
+}
+location /bio/{
+if ($request_uri = '/bio/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/bio/' ) {
+rewrite /bio/(.*)$   /$1  break;
+}
+proxy_pass    http://bio.joyme.com;
+}
+location /pal/{
+if ($request_uri = '/pal/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/pal/' ) {
+rewrite /pal/(.*)$   /$1  break;
+}
+proxy_pass    http://pal.joyme.com;
+}
+location /natu/{
+if ($request_uri = '/natu/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/natu/' ) {
+rewrite /natu/(.*)$   /$1  break;
+}
+proxy_pass    http://natu.joyme.com;
+}
+location /zjsn/{
+if ($request_uri = '/zjsn/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/zjsn/' ) {
+rewrite /zjsn/(.*)$   /$1  break;
+}
+proxy_pass    http://zjsn.joyme.com;
+}
+location /op/{
+if ($request_uri = '/op/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/op/' ) {
+rewrite /op/(.*)$   /$1  break;
+}
+proxy_pass    http://op.joyme.com;
+}
+location /gundam/{
+if ($request_uri = '/gundam/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/gundam/' ) {
+rewrite /gundam/(.*)$   /$1  break;
+}
+proxy_pass    http://gundam.joyme.com;
+}
+location /wwii/{
+if ($request_uri = '/wwii/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/wwii/' ) {
+rewrite /wwii/(.*)$   /$1  break;
+}
+proxy_pass    http://wwii.joyme.com;
+}
+location /pocketmon/{
+if ($request_uri = '/pocketmon/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/pocketmon/' ) {
+rewrite /pocketmon/(.*)$   /$1  break;
+}
+proxy_pass    http://pocketmon.joyme.com;
+}
+location /gfol/{
+if ($request_uri = '/gfol/' ) {
+rewrite  .  /首页 break;
+}
+if ($request_uri != '/gfol/' ) {
+rewrite /gfol/(.*)$   /$1  break;
+}
+proxy_pass    http://gfol.joyme.com;
+}
+

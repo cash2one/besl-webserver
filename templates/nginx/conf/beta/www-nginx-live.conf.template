@@ -1,0 +1,225 @@
+#group and user.
+#user  @NGINX_USER@ @NGINX_GROUP@;
+
+#the processes
+worker_processes  4;
+
+#error files
+error_log  /home/ops/deploy/webserver/CURRENT/nginx/logs/error.log;
+
+#pid setting.
+pid        /home/ops/deploy/webserver/CURRENT/nginx/nginx.pid;
+
+#
+events {
+    use epoll;
+    worker_connections  51200;
+}
+
+#
+http {
+    include       mime.types;
+    default_type  text/html;
+    resolver 10.170.234.88;
+
+ server_names_hash_bucket_size   128;
+    client_header_buffer_size       256k;
+    large_client_header_buffers     32 64k;
+    client_max_body_size            8m;
+    proxy_ignore_client_abort on;
+    ##
+    sendfile       on;
+    tcp_nopush     on;
+
+    #the header name has underscores
+    underscores_in_headers on;
+
+    #keepalive_timeout  0;
+    keepalive_timeout  60;
+
+    ##
+    tcp_nodelay on;
+
+    #gzip setting.
+    gzip                on;
+    gzip_min_length     1k;
+    gzip_buffers        4 16k;
+    gzip_http_version   1.0;
+    gzip_comp_level     6;
+    gzip_proxied        any;
+    gzip_types          text/plain application/x-javascript text/css application/xml  application/xml+rss text/javascript;
+    gzip_vary           on;
+    #proxxy setting.
+
+
+    #upstream setting.
+    upstream java_www_pool {
+        ip_hash;
+        server alyweb007.prod:8081;
+        server alyweb008.prod:8081;
+    }
+
+    upstream java_www_pool_nohash {
+        server alyweb007.prod:8081;
+        server alyweb008.prod:8081;
+    }
+
+    upstream java_tools_pool {
+        ip_hash;
+        server alyweb007.prod:8082;
+	    server alyweb008.prod:8082;
+    }
+
+     upstream java_image_pool01 {
+         ip_hash;
+         server alyweb007.prod:8083;
+
+     }
+
+     upstream java_image_pool02 {
+         ip_hash;
+         server alyweb008.prod:8083;
+     }
+
+
+    upstream pcapi_server_pool {
+        ip_hash;
+        server alyweb007.prod:8084;
+    }
+
+    upstream pcstat_server_pool {
+        ip_hash;
+        server alyweb008.prod:8084;
+     }
+
+
+   upstream marticle_cms_pool {
+         ip_hash;
+         server alyweb007.prod:18080;
+   }
+
+    upstream wiki_pool {
+       ip_hash;
+       server alyweb007.prod:28080;
+       server alyweb008.prod:28080;
+    }
+
+    upstream cmsimage_pool {
+       ip_hash;
+       server alyweb007.prod:48080;
+    }
+
+    upstream webcache_pool {
+           server alyweb007.prod:58088;
+        }
+
+    upstream activity_pool {
+        server alyweb008.prod:59088;
+     }
+
+    #the log format
+    include 	logformats;
+
+    server{
+        listen          8000;
+        server_name     j0y.beta joy.beta;
+        root            @NGINX_HTDOCS_ROOT@;
+
+        fastcgi_intercept_errors    on;
+        error_page                  404 403 502 = http://www.joyme.beta;
+
+        location ^~/ {
+            index index.jsp;
+
+            proxy_pass  http://java_www_pool/shorturl/;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffers            32 8k;
+        }
+
+        access_log /home/ops/deploy/webserver/CURRENT/nginx/logs/access_j0y.log j0y;
+    }
+
+    server{
+        listen       8000;
+        server_name  lib.joyme.beta;
+
+        index        index.html index.htm;
+        #root         @NGINX_HTDOCS_ROOT@;
+
+        location ^~ /static/ {
+            root @NGINX_HTDOCS_ROOT@;
+        }
+
+        location ^~ /hotdeploy/static/ {
+            root @NGINX_HTDOCS_ROOT@;
+        }
+
+        location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$ {
+            expires      30d;
+        }
+
+        location ~ .*\.(js|css)?$ {
+            expires      1h;
+        }
+
+        access_log  /home/ops/deploy/webserver/CURRENT/nginx/logs/access_lib.log  lib;
+    }
+
+    server {
+        listen          8000;
+        server_name     status.joyme.beta;
+
+        location /nginx_status {
+            stub_status on;
+            access_log   off;
+        }
+    }
+
+        include vhost/vhost_www.joyme.beta;
+        include vhost/vhost_article;
+        include vhost/vhost_bbs;
+        include vhost/vhost_hezuo;
+        include vhost/vhost_zozoka;
+        include vhost/vhost_res;
+        include vhost/vhost_tools;
+        include vhost/vhost_marticle;
+        include vhost/vhost_wiki;
+        include vhost/vhost_search;
+        include vhost/vhost_subdomain_wiki;
+        include vhost/vhost_api;
+        include vhost/vhost_cmsimagebeta;
+        include vhost/vhost_youku;
+        include vhost/vhost_beta_youku_com;
+        include vhost/vhost_cj2015;
+
+        include vhost/vhost_v_joyme_beta;
+        include vhost/vhost_m_v_joyme_beta;
+
+        include vhost/vhost_m_wiki;
+        include vhost/vhost_static;
+        include vhost/vhost_hs;
+        include vhost/vhost_pcapi;
+        include vhost/vhost_pcstat;
+        include vhost/vhost_joymewiki;
+        include vhost/vhost_wikiedit;
+        include vhost/vhost_webcache_joyme_beta;
+        include vhost/vhost_node_beta;
+	    include vhost/xinwen.joyme.beta.conf;
+        include vhost/vhost_laiwan_joyme_beta;
+        include vhost/vhost_activity;
+        include vhost/vhost_uc;
+
+        include vhost/vhost_wikiapp_joyme_beta;
+        include vhost/vhost_wikiservice_joyme_beta;
+}

@@ -1,0 +1,3 @@
+if ( $host ~ '(xrpx|snsgz|ppsg|ms|yzqx|ylzl|xj|wshy|wiz|txhd|ttlz|ttltf|ttfzl|ttfw|ttcq|ttaxc|tgdrrpg|smdl|shyxz|qtds|qqs|qmtj|qmqj|qmnc|qmfjdz|qmdgs|qmctx|qhero|my|mt2|ml|ldxy|jjdmw|hzdld|hycs|hlxy|hlddz|hh|dxcb|dtdg|ds|dqmsl|dqm|cblw|bwm|lt|ttkp|qjnn|krsma|zjsn).joyme.beta' ) {
+    rewrite ^/mwiki/(.shtml)? http://m.wiki.joyme.beta/${wkey}/$1 permanent;
+}

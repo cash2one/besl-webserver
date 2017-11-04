@@ -1,0 +1,4 @@
+
+if ( $request_uri ~ ^/wiki/mt/ ) {
+    rewrite ^/wiki/(.*) http://wiki.joyme.alpha/$1 permanent;
+}

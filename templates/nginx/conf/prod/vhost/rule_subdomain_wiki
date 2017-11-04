@@ -1,0 +1,14 @@
+set $subdomainhost 0;
+if ( $host ~ '(snsgz|sgame|qmcs|bwlb3|kof98|xhzs|rxcq|lt|ttkp|qjnn|krsma|zjsn|dtcq|qmdzs|dlfx|qmnc).joyme.com' ) {
+    set $subdomainhost 1;
+}
+if ( $subdomainhost = '1') {
+ rewrite ^/(.*) http://wiki.joyme.com/$wkey/$1 permanent;
+}
+
+#robots.txt
+location  /robots.txt {
+ if ( $host !~ '(snsgz|sgame|qmcs|bwlb3|kof98|xhzs|rxcq|lt|ttkp|qjnn|krsma|zjsn|dtcq).joyme.com' ) {
+            proxy_pass  http://java_nwikipool;
+  }
+}

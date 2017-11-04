@@ -1,0 +1,75 @@
+upstream wikiprod_poll {
+    server 127.0.0.1:9000 ;
+}
+server {
+    listen       8000;
+    server_name  ~^(.+)?\.joyme\.beta;
+    server_name_in_redirect off;
+    index index.html index.htm index.php;
+    root  /opt/www/wiki/beta;
+
+    set $wkey $1;
+    if ($uri = '/' ) {
+       rewrite ^/(.*)$ http://wiki.joyme.beta/$wkey/首页 permanent;
+    }
+
+    location ~ ^/baidu_.*\.html$ {
+      expires      365d;
+      root /opt/baidu_verify/;
+    }
+
+    #判断是否移动设备
+    set $ismob 0;
+    if ( $http_user_agent ~ "^((.*MIDP.*)|(.*WAP.*)|(.*UP.Browser.*)|(.*Smartphone.*)|(.*Obigo.*)|(.*Mobile.*)|(.*AU.Browser.*)|(.*wxd.Mms.*)|(.*WxdB.Browser.*)|(.*CLDC.*)|(.*UP.Link.*)|(.*KM.Browser.*)|(.*UCWEB.*)|(.*SEMC\-Browser.*)|(.*Mini.*)|(.*Symbian.*)|(.*Palm.*)|(.*Nokia.*)|(.*Panasonic.*)|(.*MOT\-.*)|(.*SonyEricsson.*)|(.*NEC\-.*)|(.*Alcatel.*)|(.*Ericsson.*)|(.*BENQ.*)|(.*BenQ.*)|(.*Amoisonic.*)|(.*Amoi\-.*)|(.*Capitel.*)|(.*PHILIPS.*)|(.*SAMSUNG.*)|(.*Lenovo.*)|(.*Mitsu.*)|(.*Motorola.*)|(.*SHARP.*)|(.*WAPPER.*)|(.*LG\-.*)|(.*LG/.*)|(.*EG900.*)|(.*CECT.*)|(.*Compal.*)|(.*kejian.*)|(.*Bird.*)|(.*BIRD.*)|(.*G900/V1.0.*)|(.*Arima.*)|(.*CTL.*)|(.*TDG.*)|(.*Daxian.*)|(.*DAXIAN.*)|(.*DBTEL.*)|(.*Eastcom.*)|(.*EASTCOM.*)|(.*PANTECH.*)|(.*Dopod.*)|(.*Haier.*)|(.*HAIER.*)|(.*KONKA.*)|(.*KEJIAN.*)|(.*LENOVO.*)|(.*Soutec.*)|(.*SOUTEC.*)|(.*SAGEM.*)|(.*SEC\-.*)|(.*SED\-.*)|(.*EMOL\-.*)|(.*INNO55.*)|(.*ZTE.*)|(.*iPhone.*)|(.*Android.*)|(.*Windows CE.*)|(Wget.*)|(Java.*)|(curl.*)|(Opera.*))$" ){
+        set $ismob 1;
+    }
+
+
+
+    location ~ .*\.(php|php5)?$ {
+      fastcgi_pass  wikiprod_poll;
+      fastcgi_index index.php;
+      fastcgi_param  SCRIPT_FILENAME  /opt/www/wiki/beta/$fastcgi_script_name;
+      include        fastcgi_params;
+    }
+   location ^~/sitemap.xml{
+     rewrite ^/sitemap.xml /sitemap.php last;
+   }
+
+ location ^~/loadphp/{
+    rewrite . /loadcache.php?uri last;
+ }
+
+   location / {
+       try_files $uri $uri/ @rewrite;
+   }
+
+
+   location @rewrite {
+            rewrite ^/(.*)$ /index.php?title=$1&$args;
+   }
+   location ^~ /maintenance/ {
+      return 403;
+   }
+
+    location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$
+    {
+      expires      30d;
+    }
+
+    location ~ .*\.(js|css)?$
+    {
+      expires      30d;
+    }
+
+   location ~^/wiki/ {
+     rewrite ^/wiki/(.*)$ http://wiki.joyme.beta/$wkey/$1 permanent;
+   }
+
+   error_page 403 404 = @mediawiki;
+   location @mediawiki {
+      rewrite ^/([^?]*)(?:\?(.*))? /index.php?title=$1&$2 last;
+   }
+
+   access_log  /opt/servicelogs/nginx/access_wiki.log joyme;
+}

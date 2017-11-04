@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!-- The contents of this file will be loaded for each web application -->
+<Context path="/" docBase="/home/ops/deploy/webserver/CURRENT/webapps/www/htdocs" privileged="true" reloadable="false">
+
+    <Manager pathname=""/>
+
+    <Loader className="com.fivewh.webapps.tomcat7.loader.FiveWebappLoader" debug="true"
+            extraRepositories="/home/ops/deploy/platform/CURRENT/classes,/home/ops/deploy/platform/CURRENT/relatedjars,/home/ops/deploy/platform/CURRENT/lib"/>
+
+    <Listener className="com.fivewh.webapps.tomcat7.listener.FiveLifecycleListener" debug="true"
+              envProps="/props/env/def.properties" servProps="/props/serv/def.properties"/>
+</Context>

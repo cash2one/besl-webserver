@@ -1,0 +1,33 @@
+include vhost/www.joyme.com.conf;
+include vhost/uc.joyme.com.conf;
+include vhost/www.joyme.com_ssl.conf;
+include vhost/api.joyme.com.conf;
+include vhost/api.joyme.com_ssl.conf;
+include vhost/passport.joyme.com.conf;
+include vhost/lib.joyme.com.conf;
+include vhost/marticle.joyme.com.conf;
+include vhost/rxx.joyme.com.conf;
+include vhost/search.joyme.com.conf;
+include vhost/tools.joyme.com.conf;
+include vhost/reswiki.joyme.com.conf;
+include vhost/cmsimage.joyme.com.conf;
+include vhost/resarticle.joyme.com.conf;
+include vhost/webcache.joyme.com.conf;
+include vhost/m.v.joyme.com.conf;
+include vhost/m.joyme.com.conf;
+include vhost/m.joyme.com_ssl.conf;
+include vhost/xinwen.joyme.com.conf;
+include vhost/joyme.youku.com.conf;
+
+include vhost/www.joynote.com.conf;
+
+include vhost/vhost_wiki_nosubdomain;
+include vhost/vhost_shorturl;
+
+include vhost/laiwan.joyme.com.conf;
+include vhost/vhost_activity;
+include vhost/vhost_wikiapp_joyme_com;
+include vhost/vhost_wikiservice_joyme_com;
+
+#pc的配置
+include vhost/pcgame/*.conf;

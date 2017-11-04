@@ -1,0 +1,842 @@
+   server{
+        listen          8000;
+        server_name     www.joyme.dev api.joyme.dev passport.joyme.dev m.joyme.dev;
+        index           index.jsp index.html index.htm;
+        root            @NGINX_HTDOCS_ROOT@;
+
+	    charset utf-8;
+
+
+        set $ismob 0;
+	    if ( $http_user_agent ~ "^((.*MIDP.*)|(.*WAP.*)|(.*UP.Browser.*)|(.*Smartphone.*)|(.*Obigo.*)|(.*Mobile.*)|(.*AU.Browser.*)|(.*wxd.Mms.*)|(.*WxdB.Browser.*)|(.*CLDC.*)|(.*UP.Link.*)|(.*KM.Browser.*)|(.*UCWEB.*)|(.*SEMC\-Browser.*)|(.*Mini.*)|(.*Symbian.*)|(.*Palm.*)|(.*Nokia.*)|(.*Panasonic.*)|(.*MOT\-.*)|(.*SonyEricsson.*)|(.*NEC\-.*)|(.*Alcatel.*)|(.*Ericsson.*)|(.*BENQ.*)|(.*BenQ.*)|(.*Amoisonic.*)|(.*Amoi\-.*)|(.*Capitel.*)|(.*PHILIPS.*)|(.*SAMSUNG.*)|(.*Lenovo.*)|(.*Mitsu.*)|(.*Motorola.*)|(.*SHARP.*)|(.*WAPPER.*)|(.*LG\-.*)|(.*LG/.*)|(.*EG900.*)|(.*CECT.*)|(.*Compal.*)|(.*kejian.*)|(.*Bird.*)|(.*BIRD.*)|(.*G900/V1.0.*)|(.*Arima.*)|(.*CTL.*)|(.*TDG.*)|(.*Daxian.*)|(.*DAXIAN.*)|(.*DBTEL.*)|(.*Eastcom.*)|(.*EASTCOM.*)|(.*PANTECH.*)|(.*Dopod.*)|(.*Haier.*)|(.*HAIER.*)|(.*KONKA.*)|(.*KEJIAN.*)|(.*LENOVO.*)|(.*Soutec.*)|(.*SOUTEC.*)|(.*SAGEM.*)|(.*SEC\-.*)|(.*SED\-.*)|(.*EMOL\-.*)|(.*INNO55.*)|(.*ZTE.*)|(.*iPhone.*)|(.*Android.*)|(.*Windows CE.*)|(Wget.*)|(Java.*)|(curl.*)|(Opera.*))$" ){
+		    set $ismob 1;
+	    }
+
+	    if ( $http_user_agent ~ ^$ ){
+	 	   	set $ismob 1;
+	    }
+
+	    set $mnote 0;
+	    if ($request_uri ~ ^/note  ){
+			set $mnote "${mnote}${ismob}";
+	    }
+
+	    set $mshare 0;
+	    if ($request_uri ~ ^/share  ){
+		    set $mshare "${mshare}${ismob}";
+	    }
+
+	    set $mlogin 0;
+	    if ($request_uri ~ ^/login  ){
+		    set $mlogin "${mlogin}${ismob}";
+	    }
+
+	    if ( $mnote = "01" ){
+	    	rewrite ^/([^/]*)/(.*)$ http://www.joyme.dev/m$1/$2 last;
+	    }
+
+	    if ( $mshare = "01" ){
+	        rewrite ^/([^/]*)/(.*)$ http://www.joyme.dev/m$1/$2 last;
+	    }
+
+	    if ( $mlogin = "01" ){
+	        rewrite ^/loginpage(.*)$ http://www.joyme.dev/mloginpage$1 last;
+	    }
+
+
+        if ( $host = 'shuang11.joyme.dev' ) {
+             rewrite ^/(.*)$ /event/shuang11/page last;
+   	    }
+
+   	    if ($request_uri ~ '^/usercenter') {
+           rewrite ^/(.*) http://uc.joyme.dev/$1 permanent;
+        }
+
+ 		if ( $host = 'joyme.dev' ) {
+      		rewrite ^/(.*)$ http://www.joyme.dev/$1 permanent;
+   		}
+
+        fastcgi_intercept_errors    on;
+        #error_page                  403 502 = http://www.joyme.dev/;
+
+        location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$ {
+            expires      30d;
+        }
+
+        location ~ .*\.(js|css)$ {
+            expires      1h;
+        }
+
+        location /sitemap.xml {
+            root   html;
+            index  index.html;
+            proxy_pass      http://webcache_pool/sitemap.xml;
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+
+            client_max_body_size  100m;
+        }
+
+        location = '/' {
+            index index.shtml index.jsp;
+
+            if (-d $request_filename) {
+                rewrite ^/(.*)([^/])$ http://$host/$1$2/ permanent;
+            }
+
+            set $ismob 0;
+            if ( $http_user_agent ~ "^((.*MIDP.*)|(.*WAP.*)|(.*UP.Browser.*)|(.*Smartphone.*)|(.*Obigo.*)|(.*AU.Browser.*)|(.*wxd.Mms.*)|(.*WxdB.Browser.*)|(.*CLDC.*)|(.*UP.Link.*)|(.*KM.Browser.*)|(.*UCWEB.*)|(.*SEMC\-Browser.*)|(.*Mini.*)|(.*Symbian.*)|(.*Palm.*)|(.*Nokia.*)|(.*Panasonic.*)|(.*MOT\-.*)|(.*SonyEricsson.*)|(.*NEC\-.*)|(.*Alcatel.*)|(.*Ericsson.*)|(.*BENQ.*)|(.*BenQ.*)|(.*Amoisonic.*)|(.*Amoi\-.*)|(.*Capitel.*)|(.*PHILIPS.*)|(.*SAMSUNG.*)|(.*Lenovo.*)|(.*Mitsu.*)|(.*Motorola.*)|(.*SHARP.*)|(.*WAPPER.*)|(.*LG\-.*)|(.*LG/.*)|(.*EG900.*)|(.*CECT.*)|(.*Compal.*)|(.*kejian.*)|(.*Bird.*)|(.*BIRD.*)|(.*G900/V1.0.*)|(.*Arima.*)|(.*CTL.*)|(.*TDG.*)|(.*Daxian.*)|(.*DAXIAN.*)|(.*DBTEL.*)|(.*Eastcom.*)|(.*EASTCOM.*)|(.*PANTECH.*)|(.*Dopod.*)|(.*Haier.*)|(.*HAIER.*)|(.*KONKA.*)|(.*KEJIAN.*)|(.*LENOVO.*)|(.*Soutec.*)|(.*SOUTEC.*)|(.*SAGEM.*)|(.*SEC\-.*)|(.*SED\-.*)|(.*EMOL\-.*)|(.*INNO55.*)|(.*ZTE.*)|(.*iPhone.*)|(.*Android.*)|(.*Windows CE.*)|(Wget.*)|(Java.*)|(curl.*)|(Opera.*))$" ){
+               	set $ismob 1;
+            }
+
+            proxy_pass  http://java_server_pool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+        }
+
+        location ^~/ {
+            index index.jsp;
+
+            proxy_pass  http://java_server_pool;
+
+            proxy_redirect           off;
+            proxy_pass_request_headers on;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffers            32 8k;
+        }
+
+        location /wiki {
+
+            #注意先后顺序
+            include vhost/rule_www_wiki;
+
+            set $ismob 0;
+            if ( $http_user_agent ~ "^((.*MIDP.*)|(.*WAP.*)|(.*UP.Browser.*)|(.*Smartphone.*)|(.*Obigo.*)|(.*Mobile.*)|(.*AU.Browser.*)|(.*wxd.Mms.*)|(.*WxdB.Browser.*)|(.*CLDC.*)|(.*UP.Link.*)|(.*KM.Browser.*)|(.*UCWEB.*)|(.*SEMC\-Browser.*)|(.*Mini.*)|(.*Symbian.*)|(.*Palm.*)|(.*Nokia.*)|(.*Panasonic.*)|(.*MOT\-.*)|(.*SonyEricsson.*)|(.*NEC\-.*)|(.*Alcatel.*)|(.*Ericsson.*)|(.*BENQ.*)|(.*BenQ.*)|(.*Amoisonic.*)|(.*Amoi\-.*)|(.*Capitel.*)|(.*PHILIPS.*)|(.*SAMSUNG.*)|(.*Lenovo.*)|(.*Mitsu.*)|(.*Motorola.*)|(.*SHARP.*)|(.*WAPPER.*)|(.*LG\-.*)|(.*LG/.*)|(.*EG900.*)|(.*CECT.*)|(.*Compal.*)|(.*kejian.*)|(.*Bird.*)|(.*BIRD.*)|(.*G900/V1.0.*)|(.*Arima.*)|(.*CTL.*)|(.*TDG.*)|(.*Daxian.*)|(.*DAXIAN.*)|(.*DBTEL.*)|(.*Eastcom.*)|(.*EASTCOM.*)|(.*PANTECH.*)|(.*Dopod.*)|(.*Haier.*)|(.*HAIER.*)|(.*KONKA.*)|(.*KEJIAN.*)|(.*LENOVO.*)|(.*Soutec.*)|(.*SOUTEC.*)|(.*SAGEM.*)|(.*SEC\-.*)|(.*SED\-.*)|(.*EMOL\-.*)|(.*INNO55.*)|(.*ZTE.*)|(.*iPhone.*)|(.*Android.*)|(.*Windows CE.*)|(Wget.*)|(Java.*)|(curl.*)|(Opera.*))$" ){
+                set $ismob 1;
+            }
+        	if ( $ismob = 1 ){
+        	    rewrite ^/wiki/(.*)$ http://www.joyme.com/mwiki/$1 permanent;
+        	}
+
+            proxy_pass  http://webcache_pool/wiki;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header         wikitype wiki;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffers            32 8k;
+        }
+
+        location /mwiki {
+
+            include vhost/rule_www_mwiki;
+
+            proxy_pass  http://webcache_pool/mwiki;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header         wikitype mwiki;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffers            32 8k;
+        }
+
+        location /appwiki/ {
+            index index.shtml index.jsp;
+
+            proxy_pass  http://webcache_pool/mwiki/;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+            proxy_set_header         channel    app;
+            proxy_set_header         wikitype        mwiki;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+
+        }
+
+        location /sougouboxwiki/ {
+            index index.shtml index.jsp;
+
+            proxy_pass  http://webcache_pool/mwiki/;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+            proxy_set_header         channel    sougoubox;
+            proxy_set_header         wikitype        mwiki;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+
+        }
+
+
+        location /sgsswiki/ {
+
+            index index.shtml index.jsp;
+
+            proxy_pass  http://webcache_pool/mwiki/;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+            proxy_set_header         channel    sgss;
+            proxy_set_header         wikitype        mwiki;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+        }
+
+
+        location /wxwiki/ {
+            index index.shtml index.jsp;
+
+            if ($request_uri ~* ^/wxwiki/([^/]*)/?$) {
+                rewrite ^/wxwiki/([^/]*)(/?)$ http://www.joyme.com/wxwiki/$1/index.shtml permanent;
+            }
+
+            expires 1d;
+
+            proxy_pass  http://webcache_pool/mwiki/;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+            proxy_set_header         channel    wx;
+            proxy_set_header         wikitype        mwiki;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+        }
+
+
+        location /youkuwiki/ {
+            index index.shtml index.jsp;
+
+            #if ($request_uri ~* ^/youkuwiki/([^/]*)/?$) {
+            #   rewrite ^/youkuwiki/([^/]*)(/?)$ http://www.joyme.com/youkuwiki/$1/index.shtml permanent;
+            #}
+
+            proxy_pass  http://webcache_pool/mwiki/;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+            proxy_set_header         channel    youku;
+            proxy_set_header         wikitype        mwiki;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+
+        }
+
+        location /xiaomiwiki/ {
+            index index.shtml index.jsp;
+
+            if ($request_uri ~* ^/xiaomiwiki/([^/]*)/?$) {
+                rewrite ^/360wiki/([^/]*)(/?)$ http://www.joyme.com/xiaomiwiki/$1/index.shtml permanent;
+            }
+
+            proxy_pass  http://webcache_pool/mwiki/;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         channel    xiaomi;
+            proxy_set_header         wikitype        mwiki;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+
+        }
+
+        location /hawiki/ {
+            index index.shtml index.jsp;
+
+            if ($request_uri ~* ^/hawiki/([^/]*)/?$) {
+                rewrite ^/360wiki/([^/]*)(/?)$ http://www.joyme.com/hawiki/$1/index.shtml permanent;
+            }
+
+            proxy_pass  http://webcache_pool/wiki/;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+            proxy_set_header         channel    ha;
+            proxy_set_header         wikitype        wiki;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+
+        }
+
+        location /bfwiki/ {
+            index index.shtml index.jsp;
+
+            if ($request_uri ~* ^/bfwiki/([^/]*)/?$) {
+                rewrite ^/hawiki/([^/]*)(/?)$ http://www.joyme.com/bfwiki/$1/index.shtml permanent;
+            }
+
+            proxy_pass  http://webcache_pool/mwiki/;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+            proxy_set_header         channel    bf;
+            proxy_set_header         wikitype        mwiki;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+
+        }
+
+        location /360zhushou/ {
+            index index.shtml index.jsp;
+
+            if ($request_uri ~* ^/360zhushou/([^/]*)/?$) {
+                rewrite ^/360zhushou/([^/]*)(/?)$ http://www.joyme.com/360zhushou/$1/index.shtml permanent;
+            }
+
+            proxy_pass  http://webcache_pool/mwiki/;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+            proxy_set_header         channel    360;
+            proxy_set_header         wikitype        mwiki;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+
+        }
+
+        location /article/ {
+            index index.shtml index.php;
+
+
+            set $ismob 0;
+            if ( $http_user_agent ~ "^((.*MIDP.*)|(.*WAP.*)|(.*UP.Browser.*)|(.*Smartphone.*)|(.*Obigo.*)|(.*AU.Browser.*)|(.*wxd.Mms.*)|(.*WxdB.Browser.*)|(.*CLDC.*)|(.*UP.Link.*)|(.*KM.Browser.*)|(.*UCWEB.*)|(.*SEMC\-Browser.*)|(.*Mini.*)|(.*Symbian.*)|(.*Palm.*)|(.*Nokia.*)|(.*Panasonic.*)|(.*MOT\-.*)|(.*SonyEricsson.*)|(.*NEC\-.*)|(.*Alcatel.*)|(.*Ericsson.*)|(.*BENQ.*)|(.*BenQ.*)|(.*Amoisonic.*)|(.*Amoi\-.*)|(.*Capitel.*)|(.*PHILIPS.*)|(.*SAMSUNG.*)|(.*Lenovo.*)|(.*Mitsu.*)|(.*Motorola.*)|(.*SHARP.*)|(.*WAPPER.*)|(.*LG\-.*)|(.*LG/.*)|(.*EG900.*)|(.*CECT.*)|(.*Compal.*)|(.*kejian.*)|(.*Bird.*)|(.*BIRD.*)|(.*G900/V1.0.*)|(.*Arima.*)|(.*CTL.*)|(.*TDG.*)|(.*Daxian.*)|(.*DAXIAN.*)|(.*DBTEL.*)|(.*Eastcom.*)|(.*EASTCOM.*)|(.*PANTECH.*)|(.*Dopod.*)|(.*Haier.*)|(.*HAIER.*)|(.*KONKA.*)|(.*KEJIAN.*)|(.*LENOVO.*)|(.*Soutec.*)|(.*SOUTEC.*)|(.*SAGEM.*)|(.*SEC\-.*)|(.*SED\-.*)|(.*EMOL\-.*)|(.*INNO55.*)|(.*ZTE.*)|(.*iPhone.*)|(.*Android.*)|(.*Windows CE.*)|(Wget.*)|(Java.*)|(curl.*)|(Opera.*))$" ){
+                set $ismob 1;
+            }
+
+            #if ( $http_user_agent ~ ^$ ){
+            #   set $ismob 1;
+            #}
+
+
+            set $mrewrite 0;
+            if ($request_uri ~ ^/article/[^/]+/.+\.html.*){
+                set $mrewrite "${mrewrite}${ismob}";
+            }
+
+            if ( $mrewrite = '01' ){
+                rewrite ^/article/([^/]+)/(.+\.html.*)$ http://marticle.joyme.com/marticle/$1/$2 last;
+            }
+
+            if ($request_uri ~ ^/article/tags ){
+                rewrite ^/article/tags/(.*)$ http://www.joyme.com/tags/$1 last;
+            }
+
+
+            proxy_pass  http://webcache_pool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+            proxy_set_header         channel    360;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+        }
+
+
+
+        location /games {
+
+            set $ismob 0;
+            if ( $http_user_agent ~ "^((.*MIDP.*)|(.*WAP.*)|(.*UP.Browser.*)|(.*Smartphone.*)|(.*Obigo.*)|(.*AU.Browser.*)|(.*wxd.Mms.*)|(.*WxdB.Browser.*)|(.*CLDC.*)|(.*UP.Link.*)|(.*KM.Browser.*)|(.*UCWEB.*)|(.*SEMC\-Browser.*)|(.*Mini.*)|(.*Symbian.*)|(.*Palm.*)|(.*Nokia.*)|(.*Panasonic.*)|(.*MOT\-.*)|(.*SonyEricsson.*)|(.*NEC\-.*)|(.*Alcatel.*)|(.*Ericsson.*)|(.*BENQ.*)|(.*BenQ.*)|(.*Amoisonic.*)|(.*Amoi\-.*)|(.*Capitel.*)|(.*PHILIPS.*)|(.*SAMSUNG.*)|(.*Lenovo.*)|(.*Mitsu.*)|(.*Motorola.*)|(.*SHARP.*)|(.*WAPPER.*)|(.*LG\-.*)|(.*LG/.*)|(.*EG900.*)|(.*CECT.*)|(.*Compal.*)|(.*kejian.*)|(.*Bird.*)|(.*BIRD.*)|(.*G900/V1.0.*)|(.*Arima.*)|(.*CTL.*)|(.*TDG.*)|(.*Daxian.*)|(.*DAXIAN.*)|(.*DBTEL.*)|(.*Eastcom.*)|(.*EASTCOM.*)|(.*PANTECH.*)|(.*Dopod.*)|(.*Haier.*)|(.*HAIER.*)|(.*KONKA.*)|(.*KEJIAN.*)|(.*LENOVO.*)|(.*Soutec.*)|(.*SOUTEC.*)|(.*SAGEM.*)|(.*SEC\-.*)|(.*SED\-.*)|(.*EMOL\-.*)|(.*INNO55.*)|(.*ZTE.*)|(.*iPhone.*)|(.*Android.*)|(.*Windows CE.*)|(Wget.*)|(Java.*)|(curl.*)|(Opera.*))$" ){
+            	set $ismob 1;
+            }
+
+            set $mrewrite 0;
+            if ( $request_uri ~* ^/games/(mkhx2013|mtol2013|mxm2013|tos)/?$ ){
+             	set $mrewrite "${mrewrite}${ismob}";
+            }
+
+            if ( $mrewrite = '01' ){
+             	rewrite ^(.*)/?$ http://www.joyme.com$1/index_mobile.html last;
+            }
+
+            set $mrewrite 0;
+            if ( $request_uri ~* ^/games/(mkhx2013|mtol2013|mxm2013|tos)/index.html$ ){
+             	set $mrewrite "${mrewrite}${ismob}";
+            }
+
+            if ( $mrewrite = '01' ){
+             	rewrite ^(.*)/index.html$ http://www.joyme.com$1/index_mobile.html last;
+            }
+
+
+
+
+            proxy_pass  http://webcache_pool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+            proxy_set_header         channel    360;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+        }
+
+        location /wikis {
+
+            proxy_pass  http://webcache_pool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+            proxy_set_header         channel    360;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+        }
+
+        location /news {
+            index index.shtml index.jsp;
+
+            if (-d $request_filename) {
+            	rewrite ^/(.*)([^/])$ http://$host/$1$2/ permanent;
+            }
+
+            set $ismob 0;
+            if ( $http_user_agent ~ "^((.*MIDP.*)|(.*WAP.*)|(.*UP.Browser.*)|(.*Smartphone.*)|(.*Obigo.*)|(.*AU.Browser.*)|(.*wxd.Mms.*)|(.*WxdB.Browser.*)|(.*CLDC.*)|(.*UP.Link.*)|(.*KM.Browser.*)|(.*UCWEB.*)|(.*SEMC\-Browser.*)|(.*Mini.*)|(.*Symbian.*)|(.*Palm.*)|(.*Nokia.*)|(.*Panasonic.*)|(.*MOT\-.*)|(.*SonyEricsson.*)|(.*NEC\-.*)|(.*Alcatel.*)|(.*Ericsson.*)|(.*BENQ.*)|(.*BenQ.*)|(.*Amoisonic.*)|(.*Amoi\-.*)|(.*Capitel.*)|(.*PHILIPS.*)|(.*SAMSUNG.*)|(.*Lenovo.*)|(.*Mitsu.*)|(.*Motorola.*)|(.*SHARP.*)|(.*WAPPER.*)|(.*LG\-.*)|(.*LG/.*)|(.*EG900.*)|(.*CECT.*)|(.*Compal.*)|(.*kejian.*)|(.*Bird.*)|(.*BIRD.*)|(.*G900/V1.0.*)|(.*Arima.*)|(.*CTL.*)|(.*TDG.*)|(.*Daxian.*)|(.*DAXIAN.*)|(.*DBTEL.*)|(.*Eastcom.*)|(.*EASTCOM.*)|(.*PANTECH.*)|(.*Dopod.*)|(.*Haier.*)|(.*HAIER.*)|(.*KONKA.*)|(.*KEJIAN.*)|(.*LENOVO.*)|(.*Soutec.*)|(.*SOUTEC.*)|(.*SAGEM.*)|(.*SEC\-.*)|(.*SED\-.*)|(.*EMOL\-.*)|(.*INNO55.*)|(.*ZTE.*)|(.*iPhone.*)|(.*Android.*)|(.*Windows CE.*)|(Wget.*)|(Java.*)|(curl.*)|(Opera.*))$" ){
+            	set $ismob 1;
+            }
+
+            set $mrewrite 0;
+            if ( $request_uri ~* ^/news/years/$ ){
+             	set $mrewrite "${mrewrite}${ismob}";
+            }
+
+            if ( $mrewrite = '01' ){
+             	rewrite ^(.*)$ http://marticle.joyme.com/event/static/event/index.html last;
+            }
+
+            proxy_pass  http://webcache_pool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+        }
+
+        location /wechat {
+            index index.shtml index.jsp;
+
+            if (-d $request_filename) {
+            	rewrite ^/(.*)([^/])$ http://$host/$1$2/ permanent;
+            }
+
+            proxy_pass  http://webcache_pool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+        }
+
+        location /newgift {
+            index index.shtml index.jsp;
+
+            if (-d $request_filename) {
+                rewrite ^/(.*)([^/])$ http://$host/$1$2/ permanent;
+            }
+
+            proxy_pass  http://webcache_pool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+        }
+
+        location /tags/{
+            index index.shtml index.jsp;
+
+            if ($request_uri ~ ^/article/tags ){
+                rewrite ^/article/tags/(.*)$ http://www.joyme.com/tags/$1 last;
+            }
+
+            proxy_pass  http://webcache_pool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            #the mobile client
+            #oauth headers
+            proxy_set_header         access_token    $http_access_token;
+            proxy_set_header         client_id       $http_client_id;
+            proxy_set_header         client_secret   $http_client_secret;
+            #the cleint info headers
+            proxy_set_header         m_client_type   $http_m_client_type;
+            proxy_set_header         m_os_version    $http_m_os_version;
+            proxy_set_header         m_hd_type       $http_m_hd_type;
+            proxy_set_header         m_serial        $http_m_serial;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffer_size   		128k;
+            proxy_buffers            32 32k;
+        }
+
+        access_log @NGINX_ROOT@/logs/access_joyme.log joyme;
+    }

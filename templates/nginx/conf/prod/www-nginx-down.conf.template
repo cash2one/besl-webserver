@@ -1,0 +1,147 @@
+#group and user.
+#user  @NGINX_USER@ @NGINX_GROUP@;
+
+#the processes
+worker_processes  8;
+worker_cpu_affinity 00000001 00000010 00000100 00001000 00010000 00100000 01000000 10000000;
+
+#error files
+error_log  @NGINX_ROOT@/logs/error.log;
+
+#pid setting.
+pid        @NGINX_ROOT@/nginx.pid;
+
+#
+worker_rlimit_nofile 65535; 
+events {
+    use epoll;
+    worker_connections  51200;   
+}
+
+    #ssi on;
+#ssi_silent_errors on;
+#ssi_types text/shtml;
+
+
+
+#
+http {
+    include       mime.types;
+    default_type    text/html;
+
+    server_names_hash_bucket_size   128;
+    client_header_buffer_size       256k;
+    large_client_header_buffers     32 64k;
+    client_max_body_size            8m;
+
+    ##
+    sendfile       on;
+    tcp_nopush     on;
+
+    #the header name has underscores
+    underscores_in_headers on;
+    server_tokens off;
+
+    #keepalive_timeout  0;
+    keepalive_timeout  60;
+
+    ##
+    tcp_nodelay on;
+    
+   #fastcgi_connect_timeout 300;
+   #fastcgi_send_timeout 300;
+   #fastcgi_read_timeout 300;
+   #fastcgi_buffer_size 64k;
+   #fastcgi_buffers 4 64k;
+   #fastcgi_busy_buffers_size 128k;
+   #fastcgi_temp_file_write_size 128k;
+    
+    #gzip setting.
+    gzip                on;
+    gzip_min_length     1k;
+    gzip_buffers        4 16k;
+    gzip_http_version   1.0;
+    gzip_comp_level     6;
+    gzip_proxied        any;
+    gzip_types          text/plain application/x-javascript text/css application/xml  application/xml+rss text/javascript;
+    gzip_vary           on;
+
+    #proxxy setting.
+
+    #upstream setting.
+    upstream java_www_pool {
+        ip_hash;
+
+        #web001
+        server alyweb001.prod:8081;
+        server alyweb001.prod:8082;
+
+        #web002
+        server alyweb002.prod:8081;
+        server alyweb002.prod:8082;
+    }
+
+    upstream java_www_pool_nohash {
+        #web001
+        server alyweb001.prod:8081;
+        server alyweb001.prod:8082;
+
+        #web002
+        server alyweb002.prod:8081;
+        server alyweb002.prod:8082;
+    }
+
+
+    
+    upstream java_cmsfetcher_pool {
+        ip_hash;
+
+        server alyweb006.prod:48080;
+        server alyweb004.prod:48080;
+    }
+
+    upstream webcache_pool {
+            #ip_hash;
+            server alyweb006.prod:58088;
+            server alyweb004.prod:58088;
+        }
+    
+    upstream java_nwikipool {
+        ip_hash;
+
+        server alyweb003.prod:28080;
+        server alyweb004.prod:28080;
+    }
+    
+        upstream activity_pool {
+         server alyweb003.prod:59088;
+         server alyweb004.prod:59088;
+    }
+
+    #the log format
+    include 	logformats;
+
+    server {
+        listen          8000;
+        server_name     status.joyme.com;
+
+        location /nginx_status {
+		    allow 124.205.62.2;
+            allow 192.168.0.0/16;
+            deny all;
+			
+            stub_status on;
+            access_log   off;
+        }
+    }
+
+
+	server {
+		listen 8000 default;
+		server_name _;
+		return 444;
+		access_log   off;
+     }
+
+    include include_moudle;
+  }

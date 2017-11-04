@@ -1,0 +1,29 @@
+    server{
+        listen         8000;
+        server_name    wikiapp.joyme.alpha;
+        root           @NGINX_HTDOCS_ROOT@;
+
+        fastcgi_intercept_errors    on;
+
+        location ^~/ {
+            index index.jsp;
+
+            proxy_pass  http://webcache_pool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffers            32 8k;
+        }
+
+        access_log @NGINX_ROOT@/logs/access_wikiapp.log joyme;
+    }

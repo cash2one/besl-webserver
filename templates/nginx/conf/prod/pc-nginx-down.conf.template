@@ -1,0 +1,75 @@
+#group and user.
+#user  @NGINX_USER@ @NGINX_GROUP@;
+
+#this is pc webapps
+
+#the processes
+worker_processes  8;
+worker_cpu_affinity 00000001 00000010 00000100 00001000 00010000 00100000 01000000 10000000;
+
+#error files
+error_log  @NGINX_ROOT@/logs/error.log;
+
+#pid setting.
+pid        @NGINX_ROOT@/nginx.pid;
+
+#
+events {
+    use epoll;
+    worker_connections  51200;
+}
+
+#
+http {
+    include       mime.types;
+    default_type  text/html;
+
+    server_names_hash_bucket_size   128;
+    client_header_buffer_size       32k;
+    large_client_header_buffers     4 32k;
+    client_max_body_size            8m;
+
+    ##
+    sendfile       on;
+    tcp_nopush     on;
+
+    #the header name has underscores
+    underscores_in_headers on;
+
+    #keepalive_timeout  0;
+    keepalive_timeout  1800;
+
+    ##
+    tcp_nodelay on;
+
+    #gzip setting.
+    gzip                on;
+    gzip_min_length     1k;
+    gzip_buffers        4 16k;
+    gzip_http_version   1.0;
+    gzip_comp_level     6;
+    gzip_proxied        any;
+    gzip_types          text/plain application/x-javascript text/css application/xml  application/xml+rss text/javascript;
+    gzip_vary           on;
+
+    #proxxy setting.
+
+    #upstream setting.
+    upstream pcapi_server_pool {
+        ip_hash;
+        server alyweb001.prod:8085;
+    }
+
+    upstream pcstat_server_pool {
+        ip_hash;
+        server alyweb001.prod:8086;
+    }
+
+    #all the log format setting.
+    include logformats;
+
+
+    include vhost/vhost_pcstat;
+    include vhost/vhost_pcapi;
+    include vhost/vhost_pcapi_https;
+}

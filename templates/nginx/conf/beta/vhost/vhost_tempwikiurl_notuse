@@ -1,0 +1,5 @@
+#error wikikey nslm 344348 348751
+location ~ /(.*)wiki/nslm/344348.shtml {
+  rewrite ^/(.*)wiki/.* http://$host/$1wiki/nslm/348751.shtml permanent;
+}
+

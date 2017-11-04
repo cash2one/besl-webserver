@@ -1,0 +1,45 @@
+upstream hezuo_pool {
+    ip_hash;
+
+    server 10.170.234.88:9000;
+  }
+
+server {
+    listen       8000;
+    server_name  hezuo.joyme.beta;
+    index index.html index.htm index.php;
+    root  /opt/www/hezuo/beta;
+
+
+    location ~ .*\.(php|php5)?$
+    {
+      fastcgi_pass  hezuo_pool;
+      fastcgi_index index.php;
+      fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+      include        fastcgi_params;
+    }
+
+    location ~ /baidu/aiwan/ {
+       rewrite ^/baidu/aiwan/(.*)/(.*).json /baidu/aiwan/index.php?k=$1&t=$2 last;
+    }
+
+    location ~ /sougou/xml/ {
+        rewrite ^/sougou/xml/index.xml /sougou/xml/index.php last;
+        rewrite ^/sougou/xml/joyme-onlinegame.xml /sougou/xml/onlinegame.php last;
+    }
+
+
+
+    location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$
+    {
+      expires      30d;
+    }
+
+    location ~ .*\.(js|css)?$
+    {
+      #expires      365d;
+      add_header Cache-Control no-cache;
+      add_header Cache-Control private;
+    }
+    access_log  /opt/servicelogs/nginx/access_hezuo.log joyme;
+}

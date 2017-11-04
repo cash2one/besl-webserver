@@ -1,0 +1,4 @@
+
+if ( $request_uri ~* ^/wiki(/m?wiki)*/(xrpx|snsgz|lt|ttkp|qjnn|krsma|dtcq) ) {
+    rewrite ^/wiki(/m?wiki)*/(.*) http://wiki.joyme.beta/$2 permanent;
+}

@@ -1,0 +1,82 @@
+#group and user.
+#user  @NGINX_USER@ @NGINX_GROUP@;
+
+#the processes
+worker_processes  4;
+
+#error files
+error_log  @NGINX_ROOT@/logs/error.log;
+
+#pid setting.
+pid        @NGINX_ROOT@/nginx.pid;
+
+#
+events {
+    use epoll;
+    worker_connections  51200;
+}
+
+#
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    server_names_hash_bucket_size   128;
+    client_header_buffer_size       32k;
+    large_client_header_buffers     4 32k;
+    client_max_body_size            8m;
+
+    ##
+    sendfile       on;
+    tcp_nopush     on;
+
+    #keepalive_timeout  0;
+    keepalive_timeout  60;
+
+    ##
+    tcp_nodelay on;
+
+    #gzip setting.
+    gzip                on;
+    gzip_min_length     1k;
+    gzip_buffers        4 16k;
+    gzip_http_version   1.0;
+    gzip_comp_level     6;
+    gzip_proxied        any;
+    gzip_types          text/plain application/x-javascript text/css application/xml  application/xml+rss text/javascript;
+    gzip_vary           on;
+
+    #the log format setting.
+    log_format  joyme  '$remote_addr - $remote_user [$time_local] "$request" '
+                  '$status $body_bytes_sent "$http_referer" '
+                  '"$http_user_agent" $http_x_forwarded_for';
+
+    server{
+        listen          8000;
+        server_name     joyme.alpha *.joyme.alpha j0y.alpha *.j0y.alpha;
+        index           index.html index.htm;
+        root            @NGINX_ROOT@/html/down;
+
+        location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$ {
+            expires      30d;
+        }
+
+        location ~ .*\.(js|css|html|htm)$ {
+            expires      1h;
+        }
+
+        error_page 404 403 500 502 503 504 = /index.html;
+
+        access_log @NGINX_ROOT@/logs/access_joyme_down.log joyme;
+    }
+
+    server {
+        listen          8000;
+        server_name     status.joyme.alpha;
+
+        location /nginx_status {
+            stub_status on;
+            access_log   off;
+        }
+    }
+}

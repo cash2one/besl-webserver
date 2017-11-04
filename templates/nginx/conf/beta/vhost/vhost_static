@@ -1,0 +1,9 @@
+server {
+    listen       8000;
+    server_name  static.joyme.beta;
+
+    location / {
+       proxy_pass http://7xjwg1.com2.z0.glb.qiniucdn.com;
+    }
+
+}

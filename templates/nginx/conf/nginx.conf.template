@@ -1,0 +1,187 @@
+#group and user.
+#user  @NGINX_USER@ @NGINX_GROUP@;
+
+#the processes
+worker_processes  4;
+
+#error files
+error_log  @NGINX_ROOT@/logs/error_default.log;
+
+#pid setting.
+pid        @NGINX_ROOT@/nginx.pid;
+
+#
+events {
+    use epoll;
+    worker_connections  51200;
+}
+
+#
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    access_log    @NGINX_ROOT@/logs/access.log  crit;
+
+    server_names_hash_bucket_size   128;
+    client_header_buffer_size       32k;
+    large_client_header_buffers     4 32k;
+    client_max_body_size            8m;
+
+    ##
+    sendfile       on;
+    tcp_nopush     on;
+
+    #keepalive_timeout  0;
+    keepalive_timeout  60;
+
+    ##
+    tcp_nodelay on;
+
+    #gzip setting.
+    gzip                on;
+    gzip_min_length     1k;
+    gzip_buffers        4 16k;
+    gzip_http_version   1.0;
+    gzip_comp_level     6;
+    gzip_proxied        any;
+    gzip_types          text/plain application/x-javascript text/css application/xml  application/xml+rss text/javascript;
+    gzip_vary           on;
+
+    #proxxy setting.
+
+    #upstream setting.
+    upstream java_server_pool {
+        server server01.dev:8081;
+        server server01.dev:8082;
+        server server01.dev:8083;
+        server server01.dev:8084;
+
+        server server02.dev:8081;
+        server server02.dev:8082;
+        server server02.dev:8083;
+        server server02.dev:8084;
+    }
+
+    server{
+        listen          8000;
+        server_name     www.joyme.com *.joyme.com;
+        index           index.jsp index.html index.htm;
+        root            @NGINX_HTDOCS_ROOT@;
+
+        fastcgi_intercept_errors    on;
+        error_page                  502 = http://lib.joyme.com/502.html;
+        error_page                  403 = /50x.html;
+
+        location ~ .*\wwwroot(gif|jpg|jpeg|png|bmp|swf)$ {
+            expires      30d;
+        }
+
+        location ~ .*\wwwroot(js|css)?$ {
+            expires      1h;
+        }
+
+        location ^~/ {
+            allow 124.205.62.2;
+            deny all;
+
+            index index.jsp;
+
+            proxy_pass  http://java_server_pool;
+
+            proxy_redirect           off;
+            proxy_set_header         Host            $host;
+            proxy_set_header         X-Real-IP       $remote_addr;
+            proxy_set_header         X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            client_max_body_size     10m;
+            client_body_buffer_size  256k;
+
+            proxy_connect_timeout    300;
+            proxy_send_timeout       300;
+            proxy_read_timeout       300;
+            proxy_buffers            32 8k;
+        }
+
+        location /50x.html {
+            root @NGINX_HTDOCS_ROOT@;
+        }
+
+        location /images {
+            root @NGINX_HTDOCS_ROOT@;
+            allow all;
+        }
+
+
+        log_format  jmh  '$remote_addr - $remote_user [$time_local] "$request" '
+                  '$status $body_bytes_sent "$http_referer" '
+                  '"$http_user_agent" $http_x_forwarded_for';
+
+        access_log @NGINX_ROOT@/logs/jmh.log  jmh;
+    }
+
+    server{
+        listen       8000;
+        server_name  lib.joyme.com;
+
+        index        index.html index.htm;
+        root         @NGINX_HTDOCS_ROOT@;
+
+        location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$ {
+            expires      30d;
+        }
+
+        location ~ .*\.(js|css)?$ {
+            expires      1h;
+        }
+
+        log_format  lib  '$remote_addr - $remote_user [$time_local] "$request" '
+                  '$status $body_bytes_sent "$http_referer" '
+                  '"$http_user_agent" $http_x_forwarded_for';
+
+        access_log  @NGINX_ROOT@/logs/lib.log  lib;
+    }
+
+    server {
+        listen       8000;
+        server_name  r001.joyme.com;
+
+        index        index.htm index.html;
+        root         @NGINX_UPLOADS_ROOT@;
+
+        fastcgi_intercept_errors on;
+        error_page               404 = http://r001.joyme.com/404.html;
+
+        location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)${
+            expires      30d;
+        }
+
+        location ~ .*\.(js|css)?$ {
+            expires      1h;
+        }
+
+        location ~* \.(gif|jpg|png|swf|flv)$ {
+              valid_referers none blocked *.joyme.com www.joyme.com lib.joyme.com;
+
+              if ($invalid_referer) {
+                 return 404;
+              }
+        }
+
+        log_format  r001  '$remote_addr - $remote_user [$time_local] "$request" '
+                  '$status $body_bytes_sent "$http_referer" '
+                  '"$http_user_agent" $http_x_forwarded_for';
+
+        access_log @NGINX_ROOT@/logs/r001.log  r001;
+    }
+
+    server {
+        listen          8000;
+        server_name     status.joyme.com;
+
+        location /nginx_status {
+            stub_status on;
+            access_log   off;
+        }
+    }
+}
